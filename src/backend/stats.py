@@ -3,5 +3,5 @@ import streamlit as st
 from dataclasses import dataclass 
 
 @dataclass
-class Statistics():
+class Statistics(): # TODO: implement the class
     pass

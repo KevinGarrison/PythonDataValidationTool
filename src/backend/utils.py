@@ -3,5 +3,5 @@ import streamlit as st
 from dataclasses import dataclass
 
 @dataclass
-class Utilitis:
+class Utilitis: # TODO: implement the class
     pass

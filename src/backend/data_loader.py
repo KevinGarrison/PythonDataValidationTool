@@ -3,7 +3,7 @@ import streamlit as st
 from dataclasses import dataclass 
 
 @dataclass
-class DataLoader():
+class DataLoader(): # TODO: Modify the class for loading various formats 
 
     @st.cache_data
     def load_data(df:pd.DataFrame) -> pd.DataFrame:
