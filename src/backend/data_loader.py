@@ -3,11 +3,19 @@ import streamlit as st
 from dataclasses import dataclass 
 
 @dataclass
-class DataLoader(): # TODO: Modify the class for loading various formats 
-
-    @st.cache_data
-    def load_data(df:pd.DataFrame) -> pd.DataFrame:
-        if df is not None and not df.empty:
-            return df
+class DataLoader: # TODO: Modify the class for loading various formats 
+    df: pd.DataFrame = None
+    def load_data(self, uploaded_file) -> pd.DataFrame:
+        if uploaded_file is not None:
+            file_path = str(uploaded_file.name)
+            if file_path[-4:] == ".csv":
+                self.df = pd.read_csv(uploaded_file)
+            elif (file_path[-4:] == ".xls") | (file_path[-4:] == ".xlsx"):
+                self.df = pd.read_excel(uploaded_file)
+            else:
+                raise TypeError(f"The file has a wrong type {file_path.name}")
         else:
-            raise ValueError("The DataFrame is either None or empty.") 
+            raise ValueError("No file uploaded") 
+    
+    def data_clearer(self):
+        self.df = None
