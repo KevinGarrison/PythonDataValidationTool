@@ -3,7 +3,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 
-st.header("Visualization of your data")
+st.header("Visualization of your data") # TODO of your data without anomalies
 
 data = st.session_state.data
 
@@ -11,7 +11,7 @@ selections =  ["All data"] + list(data.columns)
 
 feature = st.selectbox('Select a specific feature to visualize:', selections)
 
-
+# TODO Plots via a selection
 
 if feature == 'All data':
     st.write(data)
@@ -29,7 +29,7 @@ elif feature in list(data.columns):
         st.pyplot(plt)
         
     # Slider to select the number of bins for the histogram
-    bins = st.slider('Select number of bins for the histogram:', min_value=5, max_value=20, value=10)
+    bins = st.slider('Select number of bins for the histogram:', min_value=5, max_value=20, value=10) # TODO Define the range of the bins
 
     # Histogram
     plt.figure(figsize=(14, 8))
@@ -41,15 +41,7 @@ elif feature in list(data.columns):
     
 
 st.page_link("pages/statistics.py", label="Data Statistics", icon="📊")
+st.page_link("pages/download.py", label="Remove Anomalies from features", icon="❌") # TODO remove after applied once
 st.page_link("app.py", label="Home", icon="🏠")
 
-
-
-
-
-
-
-
-
-# Optionally, show the data as well
 
