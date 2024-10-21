@@ -1,16 +1,14 @@
 import streamlit as st
 import seaborn as sns
 import matplotlib.pyplot as plt
-import pandas as pd
 
-# Streamlit Header
+
 st.header("Visualization of your data")
 
-# Assuming 'data' is already set in session state
 data = st.session_state.data
 
 selections =  ["All data"] + list(data.columns)
-# Dropdown to select the feature to plot
+
 feature = st.selectbox('Select a specific feature to visualize:', selections)
 
 
@@ -18,9 +16,6 @@ feature = st.selectbox('Select a specific feature to visualize:', selections)
 if feature == 'All data':
     st.write(data)
 elif feature in list(data.columns):
-    # Set a common figure size
-    fig_width = 14
-    fig_height = 8
     
     col1, col2 = st.columns([1.5,4])
     with col1:

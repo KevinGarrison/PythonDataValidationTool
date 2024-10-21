@@ -1,8 +1,8 @@
 import streamlit as st
 
-st.header("Statistics of your data")
+st.header("Outliers removed of your data")
 
-data = st.session_state.data
+
 
 selections =  ["All data"] + list(data.columns)
 # Dropdown to select the feature to plot
@@ -16,6 +16,3 @@ if feature in list(data.columns):
     st.write(description[feature])
 st.page_link("pages/visualization.py", label="Data Visualization", icon="📈")
 st.page_link("app.py", label="Home", icon="🏠")
-
-
-
