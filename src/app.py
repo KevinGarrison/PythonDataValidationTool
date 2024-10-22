@@ -19,6 +19,7 @@ if 'page' not in st.session_state:
     st.session_state.filter_ranges = None
     st.session_state.data_cleaned = False
     st.session_state.upload_new_data = False
+    st.session_state.algo_runned = False
     
 if st.session_state.page == 'upload': # TODO 
     utils.session_state_data_clearer()

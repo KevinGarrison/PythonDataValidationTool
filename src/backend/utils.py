@@ -3,6 +3,7 @@ import streamlit as st
 from dataclasses import dataclass
 from backend.stats import Statistics
 
+
 stats = Statistics()
 
 @dataclass
@@ -31,15 +32,19 @@ class Utilitis:
         st.session_state.clear()
     @st.cache_data
     def run_algorithm(self, approach:str='IQR'):  # TODO implement the parameters via user input
-        if approach == 'IQR':
-            stats.iqr_approach()
-        elif approach == 'STD':
-            stats.std_approach()
-        elif approach == 'CLUSTERING':
-            stats.clustering_approach()
-        elif approach =='ISOLATION FOREST':
-            stats.isolation_forest_approach()
-    
+        try:
+            if approach == 'IQR':
+                stats.iqr_approach()
+            elif approach == 'STD':
+                stats.std_approach()
+            elif approach == 'CLUSTERING':
+                stats.clustering_approach()
+            elif approach =='ISOLATION FOREST':
+                stats.isolation_forest_approach() 
+            st.session_state.algo_runned = True
+        except:
+            print('Algorithm failed')
+        
     @st.cache_data
     def apply_filters_on_features(self):
         if 'filter_ranges' in st.session_state:
