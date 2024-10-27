@@ -15,11 +15,14 @@ def set_page(page):
 if 'page' not in st.session_state:
     st.session_state.page = 'upload'
     st.session_state.data = None
+    st.session_state.data_standardized =None
+    st.session_state.data_filtered = None
     st.session_state.stats_summarize = None # TODO session state for not showig the remove anomalies after applied
     st.session_state.filter_ranges = None
     st.session_state.data_cleaned = False
     st.session_state.upload_new_data = False
     st.session_state.algo_runned = False
+    st.session_state.standardized = False
     
 if st.session_state.page == 'upload': # TODO 
     utils.session_state_data_clearer()

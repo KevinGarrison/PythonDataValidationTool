@@ -11,50 +11,48 @@ class Statistics:
        and normalizing features using various statistical and machine learning approaches."""
 
     @st.cache_data
-    def feature_stats_summarize(self) -> pd.DataFrame:
+    def feature_stats_summarize(self):
         """Summarizes statistical features of the dataset."""
         try:
             df = st.session_state.data
             if df is None or df.empty:
                 st.warning("The data is empty. Please load data first.")
-                return pd.DataFrame()
-            return df.describe()
+            st.session_state.stats_summarize = df.describe()
         except Exception as e:
             st.error(f"An error occurred while summarizing statistics: {e}")
-            return pd.DataFrame()
 
     @st.cache_data
-    def iqr_approach(self) -> pd.DataFrame:
+    def iqr_approach(self):
         """Applies the IQR method to calculate feature bounds for outlier detection."""
         df = st.session_state.data
         summary = df.describe()
-        return pd.DataFrame({
+        st.session_state.filter_ranges = pd.DataFrame({
             'feature': summary.columns,
             'lower_bound': summary.loc['25%'] - 1.5 * (summary.loc['75%'] - summary.loc['25%']),
             'upper_bound': summary.loc['75%'] + 1.5 * (summary.loc['75%'] - summary.loc['25%'])
         })
 
     @st.cache_data
-    def std_approach(self, alpha: int = 3) -> pd.DataFrame:
+    def std_approach(self, alpha: int = 3):
         """Applies a standard deviation method to define outlier thresholds."""
         df = st.session_state.data
         summary = df.describe()
-        return pd.DataFrame({
+        st.session_state.filter_ranges = pd.DataFrame({
             'feature': summary.columns,
             'lower_bound': summary.loc['mean'] - alpha * summary.loc['std'],
             'upper_bound': summary.loc['mean'] + alpha * summary.loc['std']
         })
 
     @st.cache_data
-    def normalize_numerical_data(self) -> pd.DataFrame:
+    def normalize_numerical_data(self):
         """Standardizes numerical data using Z-score normalization."""
         try:
             df = st.session_state.data
             scaler = StandardScaler()
-            return scaler.fit_transform(df)
+            st.session_state.data_standardized = scaler.fit_transform(df)
         except Exception as e:
             st.error(f"An error occurred during normalization: {e}")
-            return pd.DataFrame()
+            
 
     @st.cache_data
     def f1(self, z: pd.Series, beta_1: int, beta_2: int) -> pd.Series:
@@ -70,13 +68,11 @@ class Statistics:
         return mask_f1 & mask_iforest
 
     @st.cache_data
-    def gamma_outlier(self, alphas: int = 6, alphak: int = 30) -> pd.DataFrame:
+    def gamma_outlier(self, alphas: int = 6, alphak: int = 30):
         """Detects outliers using skewness and kurtosis thresholds with flexible gamma adjustments."""
         df = st.session_state.data_standardized
         if df is None:
             st.warning("Standardized data not found. Please normalize data first.")
-            return pd.DataFrame()
-
         filter_ranges = []
         for column in df.columns:
             data = df[column]
@@ -91,7 +87,7 @@ class Statistics:
                 'lower_bound': filtered_data.min(),
                 'upper_bound': filtered_data.max()
             })
-        return pd.DataFrame(filter_ranges)
+        st.session_state.filter_ranges = pd.DataFrame(filter_ranges)
 
     @st.cache_data
     def isolation_forest(self, z: pd.Series) -> pd.Series:

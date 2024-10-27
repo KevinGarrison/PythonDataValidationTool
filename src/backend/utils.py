@@ -31,16 +31,17 @@ class Utilitis:
     def session_state_clearer(self):
         st.session_state.clear()
     @st.cache_data
-    def run_algorithm(self, approach:str='IQR'):  # TODO implement the parameters via user input
+    def run_algorithm(self, approach:str='GAMMA'):  # TODO implement the parameters via user input
         try:
+            df = st.session_state.data
+            stats.normalize_numerical_data()
+
             if approach == 'IQR':
                 stats.iqr_approach()
             elif approach == 'STD':
                 stats.std_approach()
-            elif approach == 'CLUSTERING':
-                stats.clustering_approach()
-            elif approach =='ISOLATION FOREST':
-                stats.isolation_forest_approach() 
+            elif approach =='GAMMA':
+                stats.gamma_outlier() 
             st.session_state.algo_runned = True
         except:
             print('Algorithm failed')
