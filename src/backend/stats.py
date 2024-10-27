@@ -14,7 +14,7 @@ class Statistics:
     def feature_stats_summarize(self) -> pd.DataFrame:
         """Summarizes statistical features of the dataset."""
         try:
-            df = st.session_state.get('data')
+            df = st.session_state.data
             if df is None or df.empty:
                 st.warning("The data is empty. Please load data first.")
                 return pd.DataFrame()
@@ -26,7 +26,7 @@ class Statistics:
     @st.cache_data
     def iqr_approach(self) -> pd.DataFrame:
         """Applies the IQR method to calculate feature bounds for outlier detection."""
-        df = st.session_state.get('data')
+        df = st.session_state.data
         summary = df.describe()
         return pd.DataFrame({
             'feature': summary.columns,
@@ -37,7 +37,7 @@ class Statistics:
     @st.cache_data
     def std_approach(self, alpha: int = 3) -> pd.DataFrame:
         """Applies a standard deviation method to define outlier thresholds."""
-        df = st.session_state.get('data')
+        df = st.session_state.data
         summary = df.describe()
         return pd.DataFrame({
             'feature': summary.columns,
@@ -49,7 +49,7 @@ class Statistics:
     def normalize_numerical_data(self) -> pd.DataFrame:
         """Standardizes numerical data using Z-score normalization."""
         try:
-            df = st.session_state.get('data')
+            df = st.session_state.data
             scaler = StandardScaler()
             return scaler.fit_transform(df)
         except Exception as e:
@@ -60,7 +60,7 @@ class Statistics:
     def f1(self, z: pd.Series, beta_1: int, beta_2: int) -> pd.Series:
         """Detects outliers based on specified z-score thresholds."""
         anomaly_mask = (z <= -beta_1) | (z >= beta_2)
-        return anomaly_mask.astype(int)
+        return anomaly_mask
 
     @st.cache_data
     def f2(self, z: pd.Series, beta_1: int, beta_2: int, gamma: int = 3) -> pd.Series:
@@ -72,7 +72,7 @@ class Statistics:
     @st.cache_data
     def gamma_outlier(self, alphas: int = 6, alphak: int = 30) -> pd.DataFrame:
         """Detects outliers using skewness and kurtosis thresholds with flexible gamma adjustments."""
-        df = st.session_state.get('data_standardized')
+        df = st.session_state.data_standardized
         if df is None:
             st.warning("Standardized data not found. Please normalize data first.")
             return pd.DataFrame()
