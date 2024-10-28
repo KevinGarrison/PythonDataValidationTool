@@ -130,7 +130,7 @@ class Statistics:
     
 
     @st.cache_data
-    def boxplot(self, data, column, box_color='cyan', whisker_color='blue', median_color='orange', outlier_color='red', bound_color='purple'):
+    def boxplot(self, data, column, box_color='cyan', whisker_color='cyan', median_color='orange', outlier_color='red', bound_color='purple'):
         
         np_array_data = np.array(data[column])  
         sorted_data = np.sort(np_array_data)
@@ -156,8 +156,8 @@ class Statistics:
         ax.plot([median, median], [0.2, 0.8], color=median_color, linewidth=2, label='Median')
         ax.plot([min_val, q1], [0.5, 0.5], color=whisker_color, linewidth=2, label='Whiskers')  
         ax.plot([q3, max_val], [0.5, 0.5], color=whisker_color, linewidth=2)  
-        ax.plot([min_val, min_val], [0.2, 0.8], color=whisker_color, linestyle='--', linewidth=1) 
-        ax.plot([max_val, max_val], [0.2, 0.8], color=whisker_color, linestyle='--', linewidth=1) 
+        ax.plot([min_val, min_val], [0.4, 0.6], color=whisker_color, linewidth=2) 
+        ax.plot([max_val, max_val], [0.4, 0.6], color=whisker_color, linewidth=2) 
         ax.plot([lower_bound, lower_bound], [0.2, 0.8], color=bound_color, linewidth=2, linestyle='--', label='Lower Bound')
         ax.plot([upper_bound, upper_bound], [0.2, 0.8], color=bound_color, linewidth=2, linestyle='--', label='Upper Bound')
 
