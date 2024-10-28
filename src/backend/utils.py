@@ -60,6 +60,7 @@ class Utilitis:
     def run_algorithm(self, approach:str):  # TODO implement the parameters via user input
         '''runs the chosen algorithm for outlier detection'''
         try:
+            st.session_state.data_filtered = None
             stats.normalize_numerical_data()
             if approach == 'Interquartil-Range-Method':
                 stats.iqr_approach()

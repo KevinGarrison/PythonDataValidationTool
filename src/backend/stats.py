@@ -166,7 +166,7 @@ class Statistics:
 
         ax.set_yticks([]) 
         ax.set_xticks([lower_bound, median, upper_bound])
-        ax.set_xticklabels([f'Lower: {lower_bound}', f'Median: {median}', f'Upper: {upper_bound}'])
+        ax.set_xticklabels([f'Lower: {lower_bound}', f'Median: {median}', f'Upper: {upper_bound}'], rotation=45)
         ax.set_title(f'Boxplot for {column}')
         ax.set_xlabel('Values')
         ax.legend()  
