@@ -8,12 +8,16 @@ stats = Statistics()
 
 @dataclass
 class Utilitis:
+
     @st.cache_data
     def non_numerical_data_cleaner(self):
+        '''removes all columns that are not numerical'''
         df = st.session_state.data
-        st.session_state.data =  df.select_dtypes(include=['number'])
+        st.session_state.data_numerical =  df.select_dtypes(include=['number'])
+
     @st.cache_data
     def load_data(self, uploaded_file) -> pd.DataFrame:
+        '''loads the data format csv or excel into a pandas dataframe'''
         if uploaded_file is not None:
             file_path = str(uploaded_file.name)
             if file_path[-4:] == ".csv":
@@ -24,43 +28,61 @@ class Utilitis:
                 raise TypeError(f"The file has a wrong type {file_path.name}")
         else:
             raise ValueError("No file uploaded") 
-    @st.cache_data    
+    
+    @st.cache_data
     def session_state_data_clearer(self):
+        '''clears all data in session states'''
         st.session_state.data = None
+        st.session_state.data_numerical = None
+        st.session_state.data_standardized = None
+        st.session_state.data_inversed = None
+        st.session_state.data_filtered = None
+        st.session_state.data_final = None
+        # Stats state
+        st.session_state.stats_summarize = None 
+        # Filter range state
+        st.session_state.filter_ranges = None
+        # Action states
+        st.session_state.data_cleaned = False
+        st.session_state.upload_new_data = False
+        st.session_state.algo_runned = False
+        st.session_state.standardized = False
+        # Scaler parameters states
+        st.session_state.scaler_mean = None
+        st.session_state.scaler_scale = None
+
     @st.cache_data
     def session_state_clearer(self):
+        '''clears all session states'''
         st.session_state.clear()
-    @st.cache_data
-    def run_algorithm(self, approach:str='GAMMA'):  # TODO implement the parameters via user input
-        try:
-            df = st.session_state.data
-            stats.normalize_numerical_data()
 
-            if approach == 'IQR':
+    @st.cache_data
+    def run_algorithm(self, approach:str):  # TODO implement the parameters via user input
+        '''runs the chosen algorithm for outlier detection'''
+        try:
+            stats.normalize_numerical_data()
+            if approach == 'Interquartil-Range-Method':
                 stats.iqr_approach()
-            elif approach == 'STD':
+            elif approach == 'Z-Score-Method':
                 stats.std_approach()
-            elif approach =='GAMMA':
-                stats.gamma_outlier() 
-            st.session_state.algo_runned = True
+            elif approach == 'Advanced-Gamma-Method':
+                stats.gamma_outlier()
+            #self.apply_filters_on_features() # TODO call function mabey in another part of the code if needed
+            #stats.inverse_normalize_data()
+            stats.inverse_filter_ranges()
         except:
             print('Algorithm failed')
         
     @st.cache_data
     def apply_filters_on_features(self):
         if 'filter_ranges' in st.session_state:
-
             filter_ranges_df = st.session_state.filter_ranges
-            df = st.session_state.data
-
+            df = st.session_state.data_standardized
             for feature in filter_ranges_df['feature']:
                 lower = filter_ranges_df.loc[filter_ranges_df['feature'] == feature, 'lower_bound'].values[0]
                 upper = filter_ranges_df.loc[filter_ranges_df['feature'] == feature, 'upper_bound'].values[0]
 
-                # Apply the filter and create a new Series with only the valid values
-                filtered_values = df[feature][(df[feature] > lower) & (df[feature] < upper)]
+                mask = (df[feature] > lower) & (df[feature] < upper)
+                df[feature] = df[feature][mask]
 
-                # Assign filtered values back to the DataFrame
-                df[feature] = filtered_values
-
-                st.session_state.data = df
+                st.session_state.data_filtered = df

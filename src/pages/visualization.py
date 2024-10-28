@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 st.header("Visualization of your data") # TODO of your data without anomalies
 
-data = st.session_state.data
+data = st.session_state.data_final
 
 selections =  ["All data"] + list(data.columns)
 
@@ -39,9 +39,10 @@ elif feature in list(data.columns):
     plt.title(f'Histogram of {feature} Distribution with {bins} bins')
     st.pyplot(plt)
     
-
+method = st.selectbox(label='Choose method to determine feature ranges:',options=['Interquartil-Range-Method', 'Z-Score-Method', 'Advanced-Gamma-Method'])
+st.session_state.method = method
 st.page_link("pages/statistics.py", label="Data Statistics", icon="📊")
-st.page_link("pages/download.py", label="Remove Anomalies from features", icon="❌") # TODO remove after applied once
+st.page_link("pages/download.py", label="Determin feature ranges", icon="📐") 
 st.page_link("app.py", label="Home", icon="🏠")
 
 

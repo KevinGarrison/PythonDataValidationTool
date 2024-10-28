@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import IsolationForest
 from scipy.stats import skew, kurtosis
+import numpy as np
+import matplotlib.pyplot as plt
 
 @dataclass
 class Statistics:
@@ -14,17 +16,59 @@ class Statistics:
     def feature_stats_summarize(self):
         """Summarizes statistical features of the dataset."""
         try:
-            df = st.session_state.data
+            df = st.session_state.data_numerical
             if df is None or df.empty:
                 st.warning("The data is empty. Please load data first.")
             st.session_state.stats_summarize = df.describe()
         except Exception as e:
             st.error(f"An error occurred while summarizing statistics: {e}")
+    
+    @st.cache_data
+    def normalize_numerical_data(self):
+        """Standardizes numerical data using Z-score normalization."""
+        try:
+            df = st.session_state.data_numerical
+            columns = df.columns
+            scaler = StandardScaler()
+            standardized_data = scaler.fit_transform(df)
+            st.session_state.scaler_mean = scaler.mean_
+            st.session_state.scaler_scale = scaler.scale_
+            st.session_state.data_standardized = pd.DataFrame(standardized_data, columns=columns)
+        except Exception as e:
+            st.error(f"An error occurred during normalization: {e}")
+    
+    @st.cache_data
+    def inverse_normalize_data(self):
+        try:    
+            if 'scaler_mean' in st.session_state and 'scaler_scale' in st.session_state:
+                df = st.session_state.data_filtered
+                columns = df.columns                                                                  
+                scaler = StandardScaler()
+                scaler.mean_ = st.session_state.scaler_mean
+                scaler.scale_ = st.session_state.scaler_scale
+                original_data = scaler.inverse_transform(df)           
+                st.session_state.data_final = pd.DataFrame(original_data, columns=columns)
+        except Exception as e:
+                st.error(f"An error occurred during inverse normalization: {e}")
+    
+    @st.cache_data
+    def inverse_filter_ranges(self):
+        try:
+            ranges = st.session_state.filter_ranges.copy()  
+            st.session_state.filter_ranges_original = ranges.copy()
+            mean = st.session_state.scaler_mean
+            std = st.session_state.scaler_scale
+            ranges['lower_bound'] = round(ranges['lower_bound'] * std + mean, 2)
+            ranges['upper_bound'] = round(ranges['upper_bound'] * std + mean, 2)
+            st.session_state.filter_ranges_original = ranges
+        except Exception as e:
+            st.error(f"An error occurred during inverse normalization: {e}")
+        
 
     @st.cache_data
-    def iqr_approach(self):
+    def iqr_approach(self):                                                                                                 
         """Applies the IQR method to calculate feature bounds for outlier detection."""
-        df = st.session_state.data
+        df = st.session_state.data_standardized 
         summary = df.describe()
         st.session_state.filter_ranges = pd.DataFrame({
             'feature': summary.columns,
@@ -32,27 +76,16 @@ class Statistics:
             'upper_bound': summary.loc['75%'] + 1.5 * (summary.loc['75%'] - summary.loc['25%'])
         })
 
-    @st.cache_data
+    @st.cache_data                                                                                                          
     def std_approach(self, alpha: int = 3):
         """Applies a standard deviation method to define outlier thresholds."""
-        df = st.session_state.data
+        df = st.session_state.data_standardized
         summary = df.describe()
         st.session_state.filter_ranges = pd.DataFrame({
             'feature': summary.columns,
             'lower_bound': summary.loc['mean'] - alpha * summary.loc['std'],
             'upper_bound': summary.loc['mean'] + alpha * summary.loc['std']
         })
-
-    @st.cache_data
-    def normalize_numerical_data(self):
-        """Standardizes numerical data using Z-score normalization."""
-        try:
-            df = st.session_state.data
-            scaler = StandardScaler()
-            st.session_state.data_standardized = scaler.fit_transform(df)
-        except Exception as e:
-            st.error(f"An error occurred during normalization: {e}")
-            
 
     @st.cache_data
     def f1(self, z: pd.Series, beta_1: int, beta_2: int) -> pd.Series:
@@ -94,3 +127,52 @@ class Statistics:
         """Detects outliers using the Isolation Forest algorithm."""
         iso_forest = IsolationForest(random_state=42)
         return pd.Series(iso_forest.fit_predict(z.values.reshape(-1, 1)), index=z.index) == 1
+    
+
+    @st.cache_data
+    def boxplot(self, data, column, box_color='cyan', whisker_color='blue', median_color='orange', outlier_color='red', bound_color='purple'):
+        
+        np_array_data = np.array(data[column])  
+        sorted_data = np.sort(np_array_data)
+
+        min_val = np.min(sorted_data)
+        q1 = np.percentile(sorted_data, 25)
+        median = np.median(sorted_data)
+        q3 = np.percentile(sorted_data, 75)
+        max_val = np.max(sorted_data)
+
+        df_ranges = st.session_state.filter_ranges_original
+        row = df_ranges[df_ranges['feature'] == column]
+
+        lower_bound = row['lower_bound'].values[0]
+        upper_bound = row['upper_bound'].values[0]
+
+        outliers = sorted_data[(sorted_data < lower_bound) | (sorted_data > upper_bound)]
+        
+        fig, ax = plt.subplots(figsize=(8, 4))  
+
+        ax.add_patch(plt.Rectangle((q1, 0.2), q3 - q1, 0.6, color=box_color, edgecolor=whisker_color))
+
+        ax.plot([median, median], [0.2, 0.8], color=median_color, linewidth=2, label='Median')
+        ax.plot([min_val, q1], [0.5, 0.5], color=whisker_color, linewidth=2, label='Whiskers')  
+        ax.plot([q3, max_val], [0.5, 0.5], color=whisker_color, linewidth=2)  
+        ax.plot([min_val, min_val], [0.2, 0.8], color=whisker_color, linestyle='--', linewidth=1) 
+        ax.plot([max_val, max_val], [0.2, 0.8], color=whisker_color, linestyle='--', linewidth=1) 
+        ax.plot([lower_bound, lower_bound], [0.2, 0.8], color=bound_color, linewidth=2, linestyle='--', label='Lower Bound')
+        ax.plot([upper_bound, upper_bound], [0.2, 0.8], color=bound_color, linewidth=2, linestyle='--', label='Upper Bound')
+
+        if len(outliers) > 0:
+            ax.scatter(outliers, [0.5] * len(outliers), color=outlier_color, label='Outliers')
+
+        ax.set_yticks([]) 
+        ax.set_xticks([lower_bound, median, upper_bound])
+        ax.set_xticklabels([f'Lower: {lower_bound}', f'Median: {median}', f'Upper: {upper_bound}'])
+        ax.set_title(f'Boxplot for {column}')
+        ax.set_xlabel('Values')
+        ax.legend()  
+
+        st.pyplot(fig)
+        plt.close(fig) 
+
+
+
