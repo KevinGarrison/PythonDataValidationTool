@@ -5,7 +5,6 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import IsolationForest
 from scipy.stats import skew, kurtosis
 import numpy as np
-import matplotlib.pyplot as plt
 import plotly.express as px
 
 @dataclass
