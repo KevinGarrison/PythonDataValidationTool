@@ -1,6 +1,6 @@
 import streamlit as st
 import seaborn as sns
-import matplotlib.pyplot as plt
+import plotly.express as px
 
 
 st.header("Visualization of your data") # TODO of your data without anomalies
@@ -16,28 +16,36 @@ feature = st.selectbox('Select a specific feature to visualize:', selections)
 if feature == 'All data':
     st.write(data)
 elif feature in list(data.columns):
-    
-    col1, col2 = st.columns([1.5,4])
-    with col1:
-        st.write(data[feature])
-    with col2:
-        #Boxplot
-        plt.figure(figsize=(4, 1))  
-        sns.boxplot(x=data[feature], color='lightblue')
-        plt.xlabel(feature)
-        plt.title(f'Box Plot of {feature}')
-        st.pyplot(plt)
-        
     # Slider to select the number of bins for the histogram
     bins = st.slider('Select number of bins for the histogram:', min_value=5, max_value=20, value=10) # TODO Define the range of the bins
 
-    # Histogram
-    plt.figure(figsize=(14, 8))
-    sns.histplot(data[feature], bins=bins, kde=True, color='blue', edgecolor='black')
-    plt.xlabel(feature)
-    plt.ylabel('Frequency')
-    plt.title(f'Histogram of {feature} Distribution with {bins} bins')
-    st.pyplot(plt)
+    
+    # Create histogram with KDE
+    fig = px.histogram(data, x=feature, nbins=bins, 
+                    title=f'Histogram of {feature} Distribution with {bins} bins',
+                    color_discrete_sequence=['white'],
+                    marginal='box',
+                    width=1400,
+                    height=500
+                    )  
+
+    fig.update_traces(marker=dict(line=dict(color='black', width=1)))  # Edge color for bars
+    fig.update_layout(xaxis_title=feature, yaxis_title='Frequency')
+
+    st.plotly_chart(fig)
+    #with col2:
+    selections_plot = ['Box Plot', 'Violin Plot', 'Density Plot']
+    plot = st.selectbox('Select Chart', selections_plot)
+
+    if plot == 'Box Plot':
+        fig_chart = px.box(data, y=feature, title=f'Box Plot of {feature}')
+    elif plot == 'Violin Plot':
+        fig_chart = px.violin(data, y=feature, title=f'Violin Plot of {feature}')
+    elif plot == 'Density Plot':
+        fig_chart = px.density_contour(data, x=feature, title=f'Density Plot of {feature}')
+        # Display the selected plot
+    if fig_chart is not None:
+        st.plotly_chart(fig_chart)
     
 method = st.selectbox(label='Choose method to determine feature ranges:',options=['Interquartil-Range-Method', 'Z-Score-Method', 'Advanced-Gamma-Method'])
 st.session_state.method = method

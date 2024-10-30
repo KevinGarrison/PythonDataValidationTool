@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 from backend.utils import Utilitis
+import great_expectations as gx
+from great_expectations.core.batch import BatchRequest
 
 utils = Utilitis()
 
@@ -38,18 +40,22 @@ if 'page' not in st.session_state:
     st.session_state.scaler_mean = None
     st.session_state.scaler_scale = None
     st.session_state.method = None
-    # TEST!!!
-    st.session_state.data_test = None
-    st.session_state.test_1 = ''
-    
+    # Great Expectation states
+    st.session_state.batch_definition = None
+    st.session_state.batch_parameters = None
+    st.session_state.z_score_ex = None
+    st.session_state.min_max_exp = None
+
 if st.session_state.page == 'upload': 
     st.title("Numerical Data Validation Tool")
     st.text("Upload your data below:")
     uploaded_file = st.file_uploader(label="Choose a file", type=['csv', 'xls', 'xlsx']) 
     if uploaded_file is not None:
         utils.load_data(uploaded_file=uploaded_file)
+        
         st.subheader("Raw data:")
         st.write(st.session_state.data)
+
         st.button(label="Remove non-numerical data", on_click=set_page, args=['cleaned_data_page'])
         
 if st.session_state.page == 'cleaned_data_page':

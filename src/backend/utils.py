@@ -2,6 +2,7 @@ import pandas as pd
 import streamlit as st
 from dataclasses import dataclass
 from backend.stats import Statistics
+import great_expectations as gx
 
 
 stats = Statistics()
@@ -20,9 +21,9 @@ class Utilitis:
         '''loads the data format csv or excel into a pandas dataframe'''
         if uploaded_file is not None:
             file_path = str(uploaded_file.name)
-            if file_path[-4:] == ".csv":
+            if file_path.endswith(".csv"):
                 st.session_state.data = pd.read_csv(uploaded_file)
-            elif (file_path[-4:] == ".xls") | (file_path[-4:] == ".xlsx"):
+            elif (file_path.endswith(".xls")) | (file_path.endswith(".xlsx")):
                 st.session_state.data = pd.read_excel(uploaded_file)
             else:
                 raise TypeError(f"The file has a wrong type {file_path.name}")
@@ -50,6 +51,7 @@ class Utilitis:
         # Scaler parameters states
         st.session_state.scaler_mean = None
         st.session_state.scaler_scale = None
+        
 
     @st.cache_data
     def session_state_clearer(self):
@@ -87,3 +89,35 @@ class Utilitis:
                 df[feature] = df[feature][mask]
 
                 st.session_state.data_filtered = df
+
+    @st.cache_data
+    def setup_gx(self):
+        '''Set up Great Expectations context and connect to the loaded data'''
+        # Initialize Great Expectations context
+        context = gx.get_context()
+        data_source_name = "numerical_eval_data_source"
+        context.data_sources.add_pandas(name=data_source_name)
+        data_source = context.data_sources.get(data_source_name)
+        data_asset_name = "numerical_eval_data_asset"
+        data_source.add_dataframe_asset(name=data_asset_name)
+        data_asset = context.data_sources.get(data_source_name).get_asset(data_asset_name)
+        batch_definition_name = "numerical_eval_batch_definition"
+        st.session_state.batch_definition = data_asset.add_batch_definition_whole_dataframe(
+           batch_definition_name
+        )
+
+    @st.cache_data
+    def define_z_score_exp(self, column):
+        '''Define an expectation for column z-scores within a threshold'''
+        # Add an expectation that z-scores for the specified column are within a threshold
+        st.session_state.z_score_ex = gx.expectations.ExpectColumnValueZScoresToBeLessThan(
+            column=column, threshold=3, double_sided=True
+        )
+    
+    @st.cache_data
+    def define_column_values_between_exp(self, column, min, max):
+        '''Define an expectation for column mean values to be between a specified range'''
+        # Add an expectation for the column's mean value to be between specified min and max
+        st.session_state.min_max_ex = gx.expectations.ExpectColumnValuesToBeBetween(
+            column=column, min_value=min, max_value=max
+        )

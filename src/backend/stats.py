@@ -6,6 +6,7 @@ from sklearn.ensemble import IsolationForest
 from scipy.stats import skew, kurtosis
 import numpy as np
 import matplotlib.pyplot as plt
+import plotly.express as px
 
 @dataclass
 class Statistics:
@@ -130,16 +131,10 @@ class Statistics:
     
 
     @st.cache_data
-    def boxplot(self, data, column, box_color='cyan', whisker_color='cyan', median_color='orange', outlier_color='red', bound_color='purple'):
-        
+    def boxplot_px(self, data, column, box_color='white', whisker_color='cyan', median_color='orange', outlier_color='red', bound_color='purple'):
+        # Prepare the data
         np_array_data = np.array(data[column])  
         sorted_data = np.sort(np_array_data)
-
-        min_val = np.min(sorted_data)
-        q1 = np.percentile(sorted_data, 25)
-        median = np.median(sorted_data)
-        q3 = np.percentile(sorted_data, 75)
-        max_val = np.max(sorted_data)
 
         df_ranges = st.session_state.filter_ranges_original
         row = df_ranges[df_ranges['feature'] == column]
@@ -147,32 +142,35 @@ class Statistics:
         lower_bound = row['lower_bound'].values[0]
         upper_bound = row['upper_bound'].values[0]
 
-        outliers = sorted_data[(sorted_data < lower_bound) | (sorted_data > upper_bound)]
-        
-        fig, ax = plt.subplots(figsize=(8, 4))  
+        # Create a DataFrame for Plotly
+        box_data = pd.DataFrame({
+            'Values': sorted_data,
+            'Type': ['Normal'] * len(sorted_data)
+        })
 
-        ax.add_patch(plt.Rectangle((q1, 0.2), q3 - q1, 0.6, color=box_color, edgecolor=whisker_color))
+        # Create the boxplot
+        fig = px.box(box_data, x='Values', color='Type', 
+                    color_discrete_map={
+                        'Normal': box_color,
+                        'Outlier': outlier_color
+                    },
+                    title=f'Boxplot for {column}',
+                    points='all',
+                    width=1400,
+                    height=500)  
 
-        ax.plot([median, median], [0.2, 0.8], color=median_color, linewidth=2, label='Median')
-        ax.plot([min_val, q1], [0.5, 0.5], color=whisker_color, linewidth=2, label='Whiskers')  
-        ax.plot([q3, max_val], [0.5, 0.5], color=whisker_color, linewidth=2)  
-        ax.plot([min_val, min_val], [0.4, 0.6], color=whisker_color, linewidth=2) 
-        ax.plot([max_val, max_val], [0.4, 0.6], color=whisker_color, linewidth=2) 
-        ax.plot([lower_bound, lower_bound], [0.2, 0.8], color=bound_color, linewidth=2, linestyle='--', label='Lower Bound')
-        ax.plot([upper_bound, upper_bound], [0.2, 0.8], color=bound_color, linewidth=2, linestyle='--', label='Upper Bound')
+        # Add vertical lines for median and bounds
+        fig.add_vline(x=lower_bound, line_color=bound_color, line_width=2, line_dash="dash", annotation_text="Lower Bound", annotation_position="top right")
+        fig.add_vline(x=upper_bound, line_color=bound_color, line_width=2, line_dash="dash", annotation_text="Upper Bound", annotation_position="top right")
 
-        if len(outliers) > 0:
-            ax.scatter(outliers, [0.5] * len(outliers), color=outlier_color, label='Outliers')
+        # Update layout for aesthetics
+        fig.update_layout(
+            xaxis_title='Values',
+            yaxis_title='',
+            showlegend=True
+        )
 
-        ax.set_yticks([]) 
-        ax.set_xticks([lower_bound, median, upper_bound])
-        ax.set_xticklabels([f'Lower: {lower_bound}', f'Median: {median}', f'Upper: {upper_bound}'], rotation=45)
-        ax.set_title(f'Boxplot for {column}')
-        ax.set_xlabel('Values')
-        ax.legend()  
-
-        st.pyplot(fig)
-        plt.close(fig) 
+        st.plotly_chart(fig)
 
 
 
