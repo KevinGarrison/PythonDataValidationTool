@@ -62,7 +62,6 @@ if feature in list(df_num.columns):
             case 0:
                 lower = data['lower_bound'][0]
                 upper = data['upper_bound'][0]
-                lower_slider, upper_slider = utils.create_range_sliders(data=df_num[feature], lower=lower, upper=upper)
                 st.markdown(f'Expected lower bound: <span style="color: yellow;">{lower}</span>', unsafe_allow_html=True)
                 st.markdown(f'Expected upper bound: <span style="color: yellow;">{upper}</span>', unsafe_allow_html=True)
             case 2: 
