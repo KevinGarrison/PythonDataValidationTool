@@ -61,7 +61,7 @@ if st.session_state.page == 'upload':
 if st.session_state.page == 'cleaned_data_page':
     st.subheader("Cleaned data (only numerical columns left):")
     st.write(st.session_state.data_final)
-    method = st.selectbox(label='Choose method to determine feature ranges:',options=['Interquartil-Range-Method', 'Z-Score-Method', 'Advanced-Gamma-Method'])
+    method = st.selectbox(label='Choose method to determine feature ranges:',options=['Interquartil-Range-Method', 'Z-Score-Method', 'Modified-Z-Score-Method', 'Advanced-Gamma-Method'])
     st.session_state.method = method
     st.page_link("pages/download.py", label="Determin feature ranges", icon="📐") 
     col1, col2 = st.columns(2)

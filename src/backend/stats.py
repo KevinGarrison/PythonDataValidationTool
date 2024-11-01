@@ -125,7 +125,7 @@ class Statistics:
     @st.cache_data
     def f1(self, z: pd.Series, beta_1: int, beta_2: int) -> pd.Series:
         """Detects outliers based on specified z-score thresholds."""
-        anomaly_mask = (z <= -beta_1) | (z >= beta_2)
+        anomaly_mask = ~((-beta_1 < z) & (z < beta_2))
         return anomaly_mask
 
 
@@ -151,7 +151,7 @@ class Statistics:
                 mask = self.f1(data, beta_1=skew_result, beta_2=kurt_result)
             else:
                 mask = self.f2(data, beta_1=skew_result, beta_2=kurt_result, gamma=3)
-            filtered_data = data[mask]
+            filtered_data = data[~mask]
             filter_ranges.append({
                 'feature': column,
                 'lower_bound': round(filtered_data.min(),2),
