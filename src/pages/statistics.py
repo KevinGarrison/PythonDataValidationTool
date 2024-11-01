@@ -1,11 +1,10 @@
 import streamlit as st
 
-st.header("Statistics of your data") # TODO of your data without anomalies
+st.header("Statistics of your data")
 
 df = st.session_state.data_final
 
 selections =  ["All data"] + list(df.columns)
-# Dropdown to select the feature to plot
 feature = st.selectbox('Select a feature to get the statistics:', selections)
 
 if feature == "All data":

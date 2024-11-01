@@ -1,5 +1,4 @@
 import streamlit as st
-import seaborn as sns
 import plotly.express as px
 
 
@@ -7,15 +6,13 @@ st.header("Visualization of your data") # TODO of your data without anomalies
 
 data = st.session_state.data_final
 
-selections =  ["All data"] + list(data.columns)
+selections =  ["-Select feature-"] + list(data.columns)
 
 feature = st.selectbox('Select a specific feature to visualize:', selections)
 
 # TODO Plots via a selection
 
-if feature == 'All data':
-    st.write(data)
-elif feature in list(data.columns):
+if feature in list(data.columns):
     # Slider to select the number of bins for the histogram
     bins = st.slider('Select number of bins for the histogram:', min_value=5, max_value=20, value=10) # TODO Define the range of the bins
 
@@ -33,9 +30,8 @@ elif feature in list(data.columns):
     fig.update_layout(xaxis_title=feature, yaxis_title='Frequency')
 
     st.plotly_chart(fig)
-    #with col2:
     selections_plot = ['Box Plot', 'Violin Plot', 'Density Plot']
-    plot = st.selectbox('Select Chart', selections_plot)
+    plot = st.selectbox('Select a Chart', selections_plot)
 
     if plot == 'Box Plot':
         fig_chart = px.box(data, y=feature, title=f'Box Plot of {feature}')
@@ -43,7 +39,6 @@ elif feature in list(data.columns):
         fig_chart = px.violin(data, y=feature, title=f'Violin Plot of {feature}')
     elif plot == 'Density Plot':
         fig_chart = px.density_contour(data, x=feature, title=f'Density Plot of {feature}')
-        # Display the selected plot
     if fig_chart is not None:
         st.plotly_chart(fig_chart)
     

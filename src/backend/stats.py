@@ -24,18 +24,19 @@ class Statistics:
             st.error(f"An error occurred while summarizing statistics: {e}")
     
     @st.cache_data
-    def normalize_numerical_data(self):
+    def normalize_numerical_data(self, df):
         """Standardizes numerical data using Z-score normalization."""
         try:
-            df = st.session_state.data_numerical
+            df = df
             columns = df.columns
             scaler = StandardScaler()
             standardized_data = scaler.fit_transform(df)
             st.session_state.scaler_mean = scaler.mean_
             st.session_state.scaler_scale = scaler.scale_
-            st.session_state.data_standardized = pd.DataFrame(standardized_data, columns=columns)
+            return pd.DataFrame(standardized_data, columns=columns)
         except Exception as e:
             st.error(f"An error occurred during normalization: {e}")
+            return None
     
     @st.cache_data
     def inverse_normalize_data(self):
@@ -52,36 +53,36 @@ class Statistics:
                 st.error(f"An error occurred during inverse normalization: {e}")
     
     @st.cache_data
-    def inverse_filter_ranges(self):
+    def inverse_filter_ranges(self, filter_ranges):
         try:
-            ranges = st.session_state.filter_ranges.copy()  
-            st.session_state.filter_ranges_original = ranges.copy()
+            ranges = filter_ranges 
             mean = st.session_state.scaler_mean
             std = st.session_state.scaler_scale
             ranges['lower_bound'] = round(ranges['lower_bound'] * std + mean, 2)
             ranges['upper_bound'] = round(ranges['upper_bound'] * std + mean, 2)
-            st.session_state.filter_ranges_original = ranges
+            return ranges
         except Exception as e:
             st.error(f"An error occurred during inverse normalization: {e}")
+            return None
         
 
     @st.cache_data
-    def iqr_approach(self):                                                                                                 
+    def iqr_approach(self, df):                                                                                                 
         """Applies the IQR method to calculate feature bounds for outlier detection."""
-        df = st.session_state.data_standardized 
+        df = df 
         summary = df.describe()
-        st.session_state.filter_ranges = pd.DataFrame({
+        return pd.DataFrame({
             'feature': summary.columns,
             'lower_bound': summary.loc['25%'] - 1.5 * (summary.loc['75%'] - summary.loc['25%']),
             'upper_bound': summary.loc['75%'] + 1.5 * (summary.loc['75%'] - summary.loc['25%'])
         })
 
     @st.cache_data                                                                                                          
-    def std_approach(self, alpha: int = 3):
+    def z_score_approach(self, df, alpha: int = 3):
         """Applies a standard deviation method to define outlier thresholds."""
-        df = st.session_state.data_standardized
+        df = df
         summary = df.describe()
-        st.session_state.filter_ranges = pd.DataFrame({
+        return pd.DataFrame({
             'feature': summary.columns,
             'lower_bound': summary.loc['mean'] - alpha * summary.loc['std'],
             'upper_bound': summary.loc['mean'] + alpha * summary.loc['std']
@@ -101,9 +102,9 @@ class Statistics:
         return mask_f1 & mask_iforest
 
     @st.cache_data
-    def gamma_outlier(self, alphas: int = 6, alphak: int = 30):
+    def gamma_outlier(self, df, alphas: int = 6, alphak: int = 30):
         """Detects outliers using skewness and kurtosis thresholds with flexible gamma adjustments."""
-        df = st.session_state.data_standardized
+        df = df
         if df is None:
             st.warning("Standardized data not found. Please normalize data first.")
         filter_ranges = []
@@ -120,7 +121,7 @@ class Statistics:
                 'lower_bound': filtered_data.min(),
                 'upper_bound': filtered_data.max()
             })
-        st.session_state.filter_ranges = pd.DataFrame(filter_ranges)
+        return pd.DataFrame(filter_ranges)
 
     @st.cache_data
     def isolation_forest(self, z: pd.Series) -> pd.Series:
@@ -130,12 +131,12 @@ class Statistics:
     
 
     @st.cache_data
-    def boxplot_px(self, data, column, box_color='white', whisker_color='cyan', median_color='orange', outlier_color='red', bound_color='purple'):
+    def boxplot_px(self, data, ranges, column, box_color='white', whisker_color='cyan', median_color='orange', outlier_color='red', bound_color='purple'):
         # Prepare the data
         np_array_data = np.array(data[column])  
         sorted_data = np.sort(np_array_data)
 
-        df_ranges = st.session_state.filter_ranges_original
+        df_ranges = ranges
         row = df_ranges[df_ranges['feature'] == column]
 
         lower_bound = row['lower_bound'].values[0]

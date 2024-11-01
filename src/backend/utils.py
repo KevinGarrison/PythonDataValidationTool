@@ -59,22 +59,22 @@ class Utilitis:
         st.session_state.clear()
 
     @st.cache_data
-    def run_algorithm(self, approach:str):  # TODO implement the parameters via user input
+    def run_algorithm(self, df, approach:str):
         '''runs the chosen algorithm for outlier detection'''
         try:
-            st.session_state.data_filtered = None
-            stats.normalize_numerical_data()
+            df = df
             if approach == 'Interquartil-Range-Method':
-                stats.iqr_approach()
+                ranges = stats.iqr_approach(df)
             elif approach == 'Z-Score-Method':
-                stats.std_approach()
+                ranges = stats.z_score_approach(df)
             elif approach == 'Advanced-Gamma-Method':
-                stats.gamma_outlier()
-            #self.apply_filters_on_features() # TODO call function mabey in another part of the code if needed
-            #stats.inverse_normalize_data()
-            stats.inverse_filter_ranges()
+                df_normalized = stats.normalize_numerical_data(df)
+                ranges_normalized = stats.gamma_outlier(df_normalized)
+                return stats.inverse_filter_ranges(ranges_normalized)
+            return ranges
         except:
             print('Algorithm failed')
+            return None
         
     @st.cache_data
     def apply_filters_on_features(self):
@@ -87,13 +87,12 @@ class Utilitis:
 
                 mask = (df[feature] > lower) & (df[feature] < upper)
                 df[feature] = df[feature][mask]
-
+                st.session_state.data_filtered = None
                 st.session_state.data_filtered = df
 
     @st.cache_data
     def setup_gx(self):
         '''Set up Great Expectations context and connect to the loaded data'''
-        # Initialize Great Expectations context
         context = gx.get_context()
         data_source_name = "numerical_eval_data_source"
         context.data_sources.add_pandas(name=data_source_name)
@@ -106,18 +105,10 @@ class Utilitis:
            batch_definition_name
         )
 
-    @st.cache_data
-    def define_z_score_exp(self, column):
-        '''Define an expectation for column z-scores within a threshold'''
-        # Add an expectation that z-scores for the specified column are within a threshold
-        st.session_state.z_score_ex = gx.expectations.ExpectColumnValueZScoresToBeLessThan(
-            column=column, threshold=3, double_sided=True
-        )
     
     @st.cache_data
     def define_column_values_between_exp(self, column, min, max):
         '''Define an expectation for column mean values to be between a specified range'''
-        # Add an expectation for the column's mean value to be between specified min and max
-        st.session_state.min_max_ex = gx.expectations.ExpectColumnValuesToBeBetween(
+        return gx.expectations.ExpectColumnValuesToBeBetween(
             column=column, min_value=min, max_value=max
         )
