@@ -67,6 +67,8 @@ class Utilitis:
                 ranges = stats.iqr_approach(df)
             elif approach == 'Z-Score-Method':
                 ranges = stats.z_score_approach(df)
+            elif approach == 'Modified-Z-Score-Method':
+                ranges = stats.modified_z_score_approach(df)
             elif approach == 'Advanced-Gamma-Method':
                 df_normalized = stats.normalize_numerical_data(df)
                 ranges_normalized = stats.gamma_outlier(df_normalized)
