@@ -70,9 +70,9 @@ class Utilitis:
             elif approach == 'Modified-Z-Score-Method':
                 ranges = stats.modified_z_score_approach(df)
             elif approach == 'Advanced-Gamma-Method':
-                df_normalized = stats.normalize_numerical_data(df)
-                ranges_normalized = stats.gamma_outlier(df_normalized)
-                return stats.inverse_filter_ranges(ranges_normalized)
+                #df_normalized = stats.normalize_numerical_data(df)
+                ranges = stats.gamma_outlier(df)
+                #return stats.inverse_filter_ranges(ranges_normalized)
             return ranges
         except:
             print('Algorithm failed')

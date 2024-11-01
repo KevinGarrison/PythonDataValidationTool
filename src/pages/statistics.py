@@ -16,7 +16,7 @@ if feature in list(df.columns):
 
 
 st.session_state.method = None
-method = st.selectbox(label='Choose method to determine feature ranges:',options=['Interquartil-Range-Method', 'Z-Score-Method', 'Advanced-Gamma-Method'])
+method = st.selectbox(label='Choose method to determine feature ranges:',options=['Interquartil-Range-Method', 'Z-Score-Method', 'Modified-Z-Score-Method', 'Advanced-Gamma-Method'])
 st.session_state.method = method
 st.page_link("pages/download.py", label="Determin feature ranges", icon="📐") 
 

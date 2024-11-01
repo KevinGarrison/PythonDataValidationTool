@@ -42,7 +42,7 @@ if feature in list(data.columns):
     if fig_chart is not None:
         st.plotly_chart(fig_chart)
     
-method = st.selectbox(label='Choose method to determine feature ranges:',options=['Interquartil-Range-Method', 'Z-Score-Method', 'Advanced-Gamma-Method'])
+method = st.selectbox(label='Choose method to determine feature ranges:',options=['Interquartil-Range-Method', 'Z-Score-Method', 'Modified-Z-Score-Method', 'Advanced-Gamma-Method'])
 st.session_state.method = method
 st.page_link("pages/download.py", label="Determin feature ranges", icon="📐") 
 

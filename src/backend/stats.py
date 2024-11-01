@@ -26,51 +26,6 @@ class Statistics:
     
 
     @st.cache_data
-    def normalize_numerical_data(self, df):
-        """Standardizes numerical data using Z-score normalization."""
-        try:
-            df = df
-            columns = df.columns
-            scaler = StandardScaler()
-            standardized_data = scaler.fit_transform(df)
-            st.session_state.scaler_mean = scaler.mean_
-            st.session_state.scaler_scale = scaler.scale_
-            return pd.DataFrame(standardized_data, columns=columns)
-        except Exception as e:
-            st.error(f"An error occurred during normalization: {e}")
-            return None
-    
-
-    @st.cache_data
-    def inverse_normalize_data(self):
-        try:    
-            if 'scaler_mean' in st.session_state and 'scaler_scale' in st.session_state:
-                df = st.session_state.data_filtered
-                columns = df.columns                                                                  
-                scaler = StandardScaler()
-                scaler.mean_ = st.session_state.scaler_mean
-                scaler.scale_ = st.session_state.scaler_scale
-                original_data = scaler.inverse_transform(df)           
-                st.session_state.data_final = pd.DataFrame(original_data, columns=columns)
-        except Exception as e:
-                st.error(f"An error occurred during inverse normalization: {e}")
-    
-
-    @st.cache_data
-    def inverse_filter_ranges(self, filter_ranges):
-        try:
-            ranges = filter_ranges 
-            mean = st.session_state.scaler_mean
-            std = st.session_state.scaler_scale
-            ranges['lower_bound'] = round(ranges['lower_bound'] * std + mean, 2)
-            ranges['upper_bound'] = round(ranges['upper_bound'] * std + mean, 2)
-            return ranges
-        except Exception as e:
-            st.error(f"An error occurred during inverse normalization: {e}")
-            return None
-        
-
-    @st.cache_data
     def iqr_approach(self, df):                                                                                                 
         """Applies the IQR method to calculate feature bounds for outlier detection."""
         df = df 
@@ -125,7 +80,7 @@ class Statistics:
     @st.cache_data
     def f1(self, z: pd.Series, beta_1: int, beta_2: int) -> pd.Series:
         """Detects outliers based on specified z-score thresholds."""
-        anomaly_mask = ~((-beta_1 < z) & (z < beta_2))
+        anomaly_mask = (z <= (-beta_1)) | (z >= beta_2)
         return anomaly_mask
 
 
@@ -146,11 +101,17 @@ class Statistics:
         filter_ranges = []
         for column in df.columns:
             data = df[column]
-            skew_result, kurt_result = abs(skew(data)), abs(kurtosis(data))
+            
+            mean = data.mean()
+            std_dev = data.std()
+
+            z_scores = (data - mean) / std_dev
+
+            skew_result, kurt_result = abs(skew(z_scores)), abs(kurtosis(z_scores))
             if skew_result < alphas and kurt_result < alphak:
-                mask = self.f1(data, beta_1=skew_result, beta_2=kurt_result)
+                mask = self.f1(z_scores, beta_1=3, beta_2=3)
             else:
-                mask = self.f2(data, beta_1=skew_result, beta_2=kurt_result, gamma=3)
+                mask = self.f2(z_scores, beta_1=3, beta_2=3, gamma=2)
             filtered_data = data[~mask]
             filter_ranges.append({
                 'feature': column,
