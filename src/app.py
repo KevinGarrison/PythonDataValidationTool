@@ -63,9 +63,13 @@ if st.session_state.page == 'cleaned_data_page':
     st.write(st.session_state.data_final)
     method = st.selectbox(label='Choose method to determine feature ranges:',options=['Interquartil-Range-Method', 'Z-Score-Method', 'Advanced-Gamma-Method'])
     st.session_state.method = method
-    st.page_link("pages/statistics.py", label="Data Statistics", icon="📊")
-    st.page_link("pages/visualization.py", label="Data Visualization", icon="📈")
-    st.page_link("pages/download.py", label="Determin feature ranges", icon="📐")   
+    st.page_link("pages/download.py", label="Determin feature ranges", icon="📐") 
+    col1, col2 = st.columns(2)
+    with col1:
+        st.page_link("pages/statistics.py", label="Data Statistics", icon="📊")
+    with col2:
+        st.page_link("pages/visualization.py", label="Data Visualization", icon="📈")
+      
     st.button("Upload new data", on_click=set_page, args=['upload'])
     
 

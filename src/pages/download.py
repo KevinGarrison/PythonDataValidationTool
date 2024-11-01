@@ -41,24 +41,28 @@ with st.spinner("Processing... Please wait."):
         st.session_state.data_collection[feature] = data_collection
     time.sleep(2)
 
+
 feature = st.selectbox(label="Choose a feature to get expected value range and visualisation:",options=["-Select feature-"] + list(original_ranges['feature']))
 
 df_num = st.session_state.data_numerical
 
+
 if feature in list(df_num.columns):
     if st.session_state.data_collection[feature][1] == True:
-        st.subheader('Data range meets expectations with approach:')
+        st.subheader(f'Data range for **{feature}** meets expectations with approach:')
         st.markdown(f"<h2 style='color: yellow;'>{st.session_state.method}</h2>", unsafe_allow_html=True)
     else:
-        st.subheader('Data range is not as expected with approach:')
+        st.subheader(f'Data range for **{feature}** is not as expected with approach:')
         st.markdown(f"<h2 style='color: yellow;'>{st.session_state.method}</h2>", unsafe_allow_html=True)
     stats.boxplot_px(df_num, original_ranges, feature)
-
+    
+    
     for i, data in enumerate(st.session_state.data_collection[feature]):
         match i:
             case 0:
                 lower = data['lower_bound'][0]
                 upper = data['upper_bound'][0]
+                lower_slider, upper_slider = utils.create_range_sliders(data=df_num[feature], lower=lower, upper=upper)
                 st.markdown(f'Expected lower bound: <span style="color: yellow;">{lower}</span>', unsafe_allow_html=True)
                 st.markdown(f'Expected upper bound: <span style="color: yellow;">{upper}</span>', unsafe_allow_html=True)
             case 2: 
@@ -75,18 +79,24 @@ if feature in list(df_num.columns):
                 if data:
                     distinct_data = set(data)
                     formatted_text_distinct =  ', '.join(map(str, distinct_data)) 
-                    st.write('Unexpected values as distinct list: [', formatted_text_distinct, ']')
+                    st.markdown(f'Unexpected values as distinct list: <span style="color:green;">[{formatted_text_distinct}]</span>', unsafe_allow_html=True)
             case 6:
                 if data: 
                     df = pd.DataFrame(data)
                     sorted_df = df.sort_values(by='value')
                     st.write(sorted_df)
 
-
-method = st.selectbox(label='Choose method to determine feature ranges:',options=['Interquartil-Range-Method', 'Z-Score-Method', 'Modified-Z-Score-Method', 'Advanced-Gamma-Method'])
 st.session_state.method = None
-st.session_state.method = method
-st.page_link("pages/statistics.py", label="Data Statistics", icon="📊")
-st.page_link("pages/visualization.py", label="Data Visualization", icon="📈") # TODO implement download function
+method = st.selectbox(label='Choose method to determine feature ranges:',options=['Interquartil-Range-Method', 'Z-Score-Method', 'Modified-Z-Score-Method', 'Advanced-Gamma-Method'])
 st.page_link("pages/download.py", label="Determin feature ranges", icon="📐")
-st.page_link("app.py", label="Home", icon="🏠")
+st.session_state.method = method
+
+
+col1, col2, col3 = st.columns(3)
+with col1:
+    st.page_link("pages/statistics.py", label="Data Statistics", icon="📊")
+with col2:
+    st.page_link("pages/visualization.py", label="Data Visualization", icon="📈") # TODO implement download function
+with col3:
+    st.page_link("app.py", label="Home", icon="🏠")
+

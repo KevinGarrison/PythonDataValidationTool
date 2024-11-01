@@ -1,4 +1,4 @@
-import pandas as pd
+import pandas as pd, numpy as np
 import streamlit as st
 from dataclasses import dataclass
 from backend.stats import Statistics
@@ -114,3 +114,34 @@ class Utilitis:
         return gx.expectations.ExpectColumnValuesToBeBetween(
             column=column, min_value=min, max_value=max
         )
+    
+    def create_range_sliders(self, data, lower, upper, alpha=2):
+        # Calculate mean and standard deviation
+        std_value = data.std()
+
+        # Calculate the limits for the sliders
+        limit_lower_1 = lower - alpha * std_value
+        limit_upper_1 = lower + alpha * std_value
+
+        limit_lower_2 = upper - alpha * std_value
+        limit_upper_2 = upper + alpha * std_value
+
+        # Create a slider for the upper bound
+        lower_bound = st.slider(
+            "Adjust Lower Bound:",
+            min_value=limit_lower_1,  # Set minimum to lower_limit
+            max_value=limit_upper_1,  # Set maximum to upper_limit
+            value=lower,  # Default value is the mean
+            step=0.1  # Adjust this based on your data precision
+        )
+
+        # Create a slider for the lower bound
+        upper_bound = st.slider(
+            "Adjust Upper Bound:",
+            min_value=limit_lower_2,  # Set minimum to lower_limit
+            max_value=limit_upper_2,  # Set maximum to upper_limit
+            value=upper,  # Default value is mean - std
+            step=0.1  # Adjust this based on your data precision
+        )
+
+        return lower_bound, upper_bound

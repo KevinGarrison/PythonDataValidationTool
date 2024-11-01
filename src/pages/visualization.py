@@ -44,8 +44,10 @@ if feature in list(data.columns):
     
 method = st.selectbox(label='Choose method to determine feature ranges:',options=['Interquartil-Range-Method', 'Z-Score-Method', 'Advanced-Gamma-Method'])
 st.session_state.method = method
-st.page_link("pages/statistics.py", label="Data Statistics", icon="📊")
 st.page_link("pages/download.py", label="Determin feature ranges", icon="📐") 
-st.page_link("app.py", label="Home", icon="🏠")
 
-
+col1, col2 = st.columns(2)
+with col1:
+    st.page_link("pages/statistics.py", label="Data Statistics", icon="📊")
+with col2:
+    st.page_link("app.py", label="Home", icon="🏠")

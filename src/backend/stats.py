@@ -168,7 +168,7 @@ class Statistics:
     
 
     @st.cache_data
-    def boxplot_px(self, data, ranges, column, box_color='white', outlier_color='red', bound_color='yellow'):
+    def boxplot_px(self, data, ranges, column, bound_color='yellow'):
         # Prepare the data
         np_array_data = np.array(data[column])  
         sorted_data = np.sort(np_array_data)
@@ -187,14 +187,15 @@ class Statistics:
 
         # Create the boxplot
         fig = px.box(box_data, x='Values', color='Type', 
-                    color_discrete_map={
-                        'Normal': box_color,
-                        'Outlier': outlier_color
-                    },
                     title=f'Boxplot for {column}',
                     points='all',
                     width=1400,
                     height=500)  
+        
+        fig.update_traces(
+        marker=dict(color='green'),  
+        line=dict(color='white')     
+        )
 
         # Add vertical lines for median and bounds
         fig.add_vline(x=lower_bound, line_color=bound_color, line_width=2, line_dash="dash", annotation_text="Lower Bound", annotation_position="top right")
@@ -204,7 +205,7 @@ class Statistics:
         fig.update_layout(
             xaxis_title='Values',
             yaxis_title='',
-            showlegend=True
+            showlegend=False
         )
 
         st.plotly_chart(fig)
