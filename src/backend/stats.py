@@ -39,7 +39,7 @@ class Statistics:
     
 
     @st.cache_data
-    def modified_z_score_approach(self, df, alpha: int = 3):
+    def modified_z_score_approach(self, df, alpha: int = 3.5):
         """Calculates modified Z-scores and defines outlier thresholds."""
         df = df
         filter_ranges = []
