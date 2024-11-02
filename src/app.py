@@ -1,8 +1,5 @@
 import streamlit as st
-import pandas as pd
 from backend.utils import Utilitis
-import great_expectations as gx
-from great_expectations.core.batch import BatchRequest
 
 utils = Utilitis()
 
@@ -17,34 +14,32 @@ def set_page(page):
         st.session_state.algo_runned = False    
     st.session_state.page = page
 
+def update_method(key, *args):
+    st.session_state.selected_method = st.session_state[key]
+
+if 'process_data' in st.session_state:
+    del st.session_state.process_data
+
 if 'page' not in st.session_state:
     # Page state
-    st.session_state.page = 'upload'
+    st.session_state['page'] = 'upload'
     # Data states
-    st.session_state.data = None
-    st.session_state.data_numerical = None
-    st.session_state.data_standardized = None
-    st.session_state.data_inversed = None
-    st.session_state.data_filtered = None
-    st.session_state.data_final = None
-    # Stats state
-    st.session_state.stats_summarize = None 
+    st.session_state['data'] = None
+    st.session_state['data_numerical'] = None
+    st.session_state['data_filtered'] = None
+    st.session_state['data_final'] = None
     # Filter range state
-    st.session_state.filter_ranges = None
-    st.session_state.filter_ranges_original = None
+    st.session_state['filter_ranges'] = None
     # Action states
-    st.session_state.data_cleaned = False
-    st.session_state.upload_new_data = False
-    st.session_state.standardized = False
-    # Scaler parameters states
-    st.session_state.scaler_mean = None
-    st.session_state.scaler_scale = None
-    st.session_state.method = None
+    st.session_state['data_cleaned'] = False
+    st.session_state['upload_new_data'] = False
+    # Keys for dropdown menus
+    st.session_state['selected_method'] = 'Interquartil-Range-Method'
+    st.session_state['selected_feature'] = None
     # Great Expectation states
-    st.session_state.batch_definition = None
-    st.session_state.batch_parameters = None
-    st.session_state.z_score_ex = None
-    st.session_state.min_max_exp = None
+    st.session_state['batch_definition'] = None
+    st.session_state['batch_parameters'] = None
+    st.session_state['min_max_exp'] = None
 
 if st.session_state.page == 'upload': 
     st.title("Numerical Data Validation Tool")
@@ -61,8 +56,14 @@ if st.session_state.page == 'upload':
 if st.session_state.page == 'cleaned_data_page':
     st.subheader("Cleaned data (only numerical columns left):")
     st.write(st.session_state.data_final)
-    method = st.selectbox(label='Choose method to determine feature ranges:',options=['Interquartil-Range-Method', 'Z-Score-Method', 'Modified-Z-Score-Method', 'Advanced-Gamma-Method'])
-    st.session_state.method = method
+    st.selectbox(
+        label='Choose method to determine feature ranges:',
+        options=['Interquartil-Range-Method', 'STD-Method', 'Modified-Z-Score-Method', 'Advanced-Gamma-Method'],
+        key='method_selector_0',  
+        index=['Interquartil-Range-Method', 'STD-Method', 'Modified-Z-Score-Method', 'Advanced-Gamma-Method'].index(st.session_state.selected_method),
+        on_change=update_method,
+        args=('method_selector_0',) 
+    ) 
     st.page_link("pages/download.py", label="Determin feature ranges", icon="📐") 
     col1, col2 = st.columns(2)
     with col1:

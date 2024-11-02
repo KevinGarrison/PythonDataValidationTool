@@ -10,11 +10,13 @@ stats = Statistics()
 @dataclass
 class Utilitis:
 
+
     @st.cache_data
     def non_numerical_data_cleaner(self):
         '''removes all columns that are not numerical'''
         df = st.session_state.data
         st.session_state.data_numerical =  df.select_dtypes(include=['number'])
+
 
     @st.cache_data
     def load_data(self, uploaded_file) -> pd.DataFrame:
@@ -30,33 +32,12 @@ class Utilitis:
         else:
             raise ValueError("No file uploaded") 
     
-    @st.cache_data
-    def session_state_data_clearer(self):
-        '''clears all data in session states'''
-        st.session_state.data = None
-        st.session_state.data_numerical = None
-        st.session_state.data_standardized = None
-        st.session_state.data_inversed = None
-        st.session_state.data_filtered = None
-        st.session_state.data_final = None
-        # Stats state
-        st.session_state.stats_summarize = None 
-        # Filter range state
-        st.session_state.filter_ranges = None
-        # Action states
-        st.session_state.data_cleaned = False
-        st.session_state.upload_new_data = False
-        st.session_state.algo_runned = False
-        st.session_state.standardized = False
-        # Scaler parameters states
-        st.session_state.scaler_mean = None
-        st.session_state.scaler_scale = None
-        
 
     @st.cache_data
     def session_state_clearer(self):
         '''clears all session states'''
         st.session_state.clear()
+
 
     @st.cache_data
     def run_algorithm(self, df, approach:str):
@@ -65,19 +46,20 @@ class Utilitis:
             df = df
             if approach == 'Interquartil-Range-Method':
                 ranges = stats.iqr_approach(df)
-            elif approach == 'Z-Score-Method':
-                ranges = stats.z_score_approach(df)
+            elif approach == 'STD-Method':
+                ranges = stats.std_approach(df)
             elif approach == 'Modified-Z-Score-Method':
                 ranges = stats.modified_z_score_approach(df)
             elif approach == 'Advanced-Gamma-Method':
-                #df_normalized = stats.normalize_numerical_data(df)
                 ranges = stats.gamma_outlier(df)
-                #return stats.inverse_filter_ranges(ranges_normalized)
+
             return ranges
         except:
             print('Algorithm failed')
+
             return None
         
+
     @st.cache_data
     def apply_filters_on_features(self):
         if 'filter_ranges' in st.session_state:
@@ -91,6 +73,7 @@ class Utilitis:
                 df[feature] = df[feature][mask]
                 st.session_state.data_filtered = None
                 st.session_state.data_filtered = df
+
 
     @st.cache_data
     def setup_gx(self):
@@ -111,37 +94,8 @@ class Utilitis:
     @st.cache_data
     def define_column_values_between_exp(self, column, min, max):
         '''Define an expectation for column mean values to be between a specified range'''
+
         return gx.expectations.ExpectColumnValuesToBeBetween(
             column=column, min_value=min, max_value=max
         )
     
-    def create_range_sliders(self, data, lower, upper, alpha=2):
-        # Calculate mean and standard deviation
-        std_value = data.std()
-
-        # Calculate the limits for the sliders
-        limit_lower_1 = lower - alpha * std_value
-        limit_upper_1 = lower + alpha * std_value
-
-        limit_lower_2 = upper - alpha * std_value
-        limit_upper_2 = upper + alpha * std_value
-
-        # Create a slider for the upper bound
-        lower_bound = st.slider(
-            "Adjust Lower Bound:",
-            min_value=limit_lower_1,  # Set minimum to lower_limit
-            max_value=limit_upper_1,  # Set maximum to upper_limit
-            value=lower,  # Default value is the mean
-            step=0.1  # Adjust this based on your data precision
-        )
-
-        # Create a slider for the lower bound
-        upper_bound = st.slider(
-            "Adjust Upper Bound:",
-            min_value=limit_lower_2,  # Set minimum to lower_limit
-            max_value=limit_upper_2,  # Set maximum to upper_limit
-            value=upper,  # Default value is mean - std
-            step=0.1  # Adjust this based on your data precision
-        )
-
-        return lower_bound, upper_bound

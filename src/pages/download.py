@@ -2,7 +2,9 @@ import streamlit as st
 import pandas as pd, numpy as np
 from backend.utils import Utilitis
 from backend.stats import Statistics
-import time
+#import time
+from app import update_method
+
 
 utils = Utilitis()
 stats = Statistics()
@@ -12,13 +14,13 @@ st.header("Recommended Feature Ranges")
 data = st.session_state.data_numerical
 
 with st.spinner("Processing... Please wait."):
-    method = st.session_state.method
+    method = st.session_state.selected_method
     original_ranges = utils.run_algorithm(data, method)
     utils.setup_gx()
     batch_parameters = {"dataframe": st.session_state.data}
     batch = st.session_state.batch_definition.get_batch(
         batch_parameters=batch_parameters
-    )        
+    )
 
     st.session_state.data_collection = dict()
 
@@ -36,28 +38,27 @@ with st.spinner("Processing... Please wait."):
         data_collection.append(validation_result['result']['unexpected_count'])
         data_collection.append(round(validation_result['result']['unexpected_percent']))
         data_collection.append(validation_result['result']['partial_unexpected_list'])
-        data_collection.append(validation_result['result']['partial_unexpected_counts']) # list of dicts
+        data_collection.append(validation_result['result']['partial_unexpected_counts'])  # list of dicts
         data_collection.append(validation_result['result']['partial_unexpected_index_list'])
         st.session_state.data_collection[feature] = data_collection
-    time.sleep(2)
+        #st.write(validation_result)
+    #time.sleep(2)
+        
 
-
-feature = st.selectbox(label="Choose a feature to get expected value range and visualisation:",options=["-Select feature-"] + list(original_ranges['feature']))
+selected_feature = st.selectbox(label="Choose a feature to get expected value range and visualisation:",options=["-Select feature-"] + list(original_ranges['feature']))
 
 df_num = st.session_state.data_numerical
 
-
-if feature in list(df_num.columns):
-    if st.session_state.data_collection[feature][1] == True:
-        st.subheader(f'Data range for **{feature}** meets expectations with approach:')
-        st.markdown(f"<h2 style='color: yellow;'>{st.session_state.method}</h2>", unsafe_allow_html=True)
+if selected_feature in list(df_num.columns):
+    if st.session_state.data_collection[selected_feature][1] == True:
+        st.subheader(f'Data range for **{selected_feature}** meets expectations with approach:')
+        st.markdown(f"<h2 style='color: yellow;'>{st.session_state.selected_method}</h2>", unsafe_allow_html=True)
     else:
-        st.subheader(f'Data range for **{feature}** is not as expected with approach:')
-        st.markdown(f"<h2 style='color: yellow;'>{st.session_state.method}</h2>", unsafe_allow_html=True)
-    stats.boxplot_px(df_num, original_ranges, feature)
+        st.subheader(f'Data range for **{selected_feature}** is not as expected with approach:')
+        st.markdown(f"<h2 style='color: yellow;'>{st.session_state.selected_method}</h2>", unsafe_allow_html=True)
+    stats.boxplot_px(df_num, original_ranges, selected_feature)
     
-    
-    for i, data in enumerate(st.session_state.data_collection[feature]):
+    for i, data in enumerate(st.session_state.data_collection[selected_feature]):
         match i:
             case 0:
                 lower = data['lower_bound'][0]
@@ -71,8 +72,8 @@ if feature in list(df_num.columns):
                 st.write('Unexpected observations:', data)
 
             case 4:
-                if data > 0: 
-                    st.write('Unexpected observations in %:', data)
+                #if data > 0: 
+                st.write('Unexpected observations in %:', data)
 
             case 5:
                 if data:
@@ -85,17 +86,23 @@ if feature in list(df_num.columns):
                     sorted_df = df.sort_values(by='value')
                     st.write(sorted_df)
 
-st.session_state.method = None
-method = st.selectbox(label='Choose method to determine feature ranges:',options=['Interquartil-Range-Method', 'Z-Score-Method', 'Modified-Z-Score-Method', 'Advanced-Gamma-Method'])
-st.page_link("pages/download.py", label="Determin feature ranges", icon="📐")
-st.session_state.method = method
+st.selectbox(
+    label='Choose method to determine feature ranges:',
+    options=['Interquartil-Range-Method', 'STD-Method', 'Modified-Z-Score-Method', 'Advanced-Gamma-Method'],
+    key='method_selector_3',
+        index=['Interquartil-Range-Method', 'STD-Method', 'Modified-Z-Score-Method', 'Advanced-Gamma-Method'].index(st.session_state.selected_method),
+        on_change=update_method,
+        args=('method_selector_3',) 
+) 
 
+
+#st.page_link("pages/download.py", label="Determin feature ranges", icon="📐")
 
 col1, col2, col3 = st.columns(3)
 with col1:
     st.page_link("pages/statistics.py", label="Data Statistics", icon="📊")
 with col2:
-    st.page_link("pages/visualization.py", label="Data Visualization", icon="📈") # TODO implement download function
+    st.page_link("pages/visualization.py", label="Data Visualization", icon="📈")
 with col3:
     st.page_link("app.py", label="Home", icon="🏠")
 
