@@ -160,3 +160,16 @@ cython_debug/
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
+# Ignore all Jupyter checkpoints
+.ipynb_checkpoints/
+
+# Ignore specific output files
+*.nbconvert.ipynb
+
+# Ignore notebooks in temp or example directories
+notebooks/temp_*.ipynb
+notebooks/example_notebook_output.ipynb
+
+# Ignore data or temporary folders
+data/
+tmp/
