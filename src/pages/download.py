@@ -45,7 +45,7 @@ with st.spinner("Processing... Please wait."):
     #time.sleep(2)
         
 
-selected_feature = st.selectbox(label="Choose a feature to get expected value range and visualisation:",options=["-Select feature-"] + list(original_ranges['feature']))
+selected_feature = st.selectbox(label="Choose a feature to get expected value range and visualisation:",options=list(original_ranges['feature']))
 
 df_num = st.session_state.data_numerical
 

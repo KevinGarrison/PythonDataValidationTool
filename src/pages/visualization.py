@@ -26,15 +26,13 @@ if selected_feature in list(data.columns):
     fig.update_layout(xaxis_title=selected_feature, yaxis_title='Frequency')
 
     st.plotly_chart(fig)
-    selections_plot = ['Box Plot', 'Violin Plot', 'Density Plot']
+    selections_plot = ['Box Plot', 'Violin Plot']
     plot = st.selectbox('Select a Chart', selections_plot)
 
     if plot == 'Box Plot':
         fig_chart = px.box(data, y=selected_feature, title=f'Box Plot of {selected_feature}')
     elif plot == 'Violin Plot':
         fig_chart = px.violin(data, y=selected_feature, title=f'Violin Plot of {selected_feature}')
-    elif plot == 'Density Plot':
-        fig_chart = px.density_contour(data, x=selected_feature, title=f'Density Plot of {selected_feature}')
     if fig_chart is not None:
         st.plotly_chart(fig_chart)
     
