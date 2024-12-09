@@ -11,7 +11,7 @@ stats = Statistics()
 
 st.header("Recommended Feature Ranges")
 
-data = st.session_state.data_numerical
+data = st.session_state.data
 
 with st.spinner("Processing... Please wait."):
     method = st.session_state.selected_method
@@ -47,7 +47,7 @@ with st.spinner("Processing... Please wait."):
 
 selected_feature = st.selectbox(label="Choose a feature to get expected value range and visualisation:",options=list(original_ranges['feature']))
 
-df_num = st.session_state.data_numerical
+df_num = st.session_state.data
 
 if selected_feature in list(df_num.columns):
     if st.session_state.data_collection[selected_feature][1] == True:
@@ -88,9 +88,9 @@ if selected_feature in list(df_num.columns):
 
 st.selectbox(
     label='Choose method to determine feature ranges:',
-    options=['Interquartil-Range-Method', 'STD-Method', 'Modified-Z-Score-Method', 'Advanced-Gamma-Method'],
+    options=['Interquartil-Range-Method', 'Standard-Deviation-Method', 'Modified-Z-Score-Method', 'Advanced-Gamma-Method'],
     key='method_selector_3',
-        index=['Interquartil-Range-Method', 'STD-Method', 'Modified-Z-Score-Method', 'Advanced-Gamma-Method'].index(st.session_state.selected_method),
+        index=['Interquartil-Range-Method', 'Standard-Deviation-Method', 'Modified-Z-Score-Method', 'Advanced-Gamma-Method'].index(st.session_state.selected_method),
         on_change=update_method,
         args=('method_selector_3',) 
 ) 

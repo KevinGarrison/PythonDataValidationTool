@@ -1,9 +1,10 @@
 import streamlit as st
 from app import update_method
 
-st.header("Statistics of your data")
+st.header("Statistics of your data (only numerical).")
 
-df = st.session_state.data_final
+df = st.session_state.data
+df = df.select_dtypes(include=['number'])
 
 selections =  ["All data"] + list(df.columns)
 selected_feature = st.selectbox('Select a feature to get the statistics:', selections)
@@ -19,9 +20,9 @@ if selected_feature in list(df.columns):
 
 st.selectbox(
     label='Choose method to determine feature ranges:',
-    options=['Interquartil-Range-Method', 'STD-Method', 'Modified-Z-Score-Method', 'Advanced-Gamma-Method'],
+    options=['Interquartil-Range-Method', 'Standard-Deviation-Method', 'Modified-Z-Score-Method', 'Advanced-Gamma-Method'],
     key='method_selector_2',  
-    index=['Interquartil-Range-Method', 'STD-Method', 'Modified-Z-Score-Method', 'Advanced-Gamma-Method'].index(st.session_state.selected_method),
+    index=['Interquartil-Range-Method', 'Standard-Deviation-Method', 'Modified-Z-Score-Method', 'Advanced-Gamma-Method'].index(st.session_state.selected_method),
     on_change=update_method,
     args=('method_selector_2',)  
 )

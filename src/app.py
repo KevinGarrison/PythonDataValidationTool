@@ -7,9 +7,6 @@ st.set_page_config(initial_sidebar_state='collapsed')
 
 # Callback function
 def set_page(page):
-    if not st.session_state.data_cleaned:
-        utils.non_numerical_data_cleaner()
-        st.session_state.data_final = st.session_state.data_numerical
     if page == 'upload':
         st.session_state.algo_runned = False    
     st.session_state.page = page
@@ -41,37 +38,35 @@ if 'page' not in st.session_state:
     st.session_state['batch_parameters'] = None
     st.session_state['min_max_exp'] = None
 
-if st.session_state.page == 'upload': 
+if st.session_state.page == 'upload':
+
     st.title("Numerical Data Validation Tool")
     st.text("Upload your data below:")
     uploaded_file = st.file_uploader(label="Choose a file", type=['csv', 'xls', 'xlsx']) 
     if uploaded_file is not None:
-        utils.load_data(uploaded_file=uploaded_file)
-        
-        st.subheader("Raw data:")
-        st.write(st.session_state.data)
-
-        st.button(label="Remove non-numerical data", on_click=set_page, args=['cleaned_data_page'])
-        
-if st.session_state.page == 'cleaned_data_page':
-    st.subheader("Cleaned data (only numerical columns left):")
-    st.write(st.session_state.data_final)
-    st.selectbox(
-        label='Choose method to determine feature ranges:',
-        options=['Interquartil-Range-Method', 'STD-Method', 'Modified-Z-Score-Method', 'Advanced-Gamma-Method'],
+        df = utils.load_data(uploaded_file=uploaded_file)
+        st.session_state.data = df
+        st.subheader("Dataset:")
+        st.write(df)
+        st.selectbox(
+        label='Choose method to determine feature ranges (only for numerical values):',
+        options=['Interquartil-Range-Method', 'Standard-Deviation-Method', 'Modified-Z-Score-Method', 'Advanced-Gamma-Method'],
         key='method_selector_0',  
-        index=['Interquartil-Range-Method', 'STD-Method', 'Modified-Z-Score-Method', 'Advanced-Gamma-Method'].index(st.session_state.selected_method),
+        index=['Interquartil-Range-Method', 'Standard-Deviation-Method', 'Modified-Z-Score-Method', 'Advanced-Gamma-Method'].index(st.session_state.selected_method),
         on_change=update_method,
         args=('method_selector_0',) 
-    ) 
-    st.page_link("pages/download.py", label="Determin feature ranges", icon="📐") 
-    col1, col2 = st.columns(2)
-    with col1:
-        st.page_link("pages/statistics.py", label="Data Statistics", icon="📊")
-    with col2:
-        st.page_link("pages/visualization.py", label="Data Visualization", icon="📈")
-      
-    st.button("Upload new data", on_click=set_page, args=['upload'])
+        ) 
+        st.page_link("pages/download.py", label="Determin feature ranges", icon="📐") 
+        col1, col2 = st.columns(2)
+        with col1:
+            st.page_link("pages/statistics.py", label="Data Statistics", icon="📊")
+        with col2:
+            st.page_link("pages/visualization.py", label="Data Visualization", icon="📈")
+        
+        st.button("Upload new data", on_click=set_page, args=['upload'])
+            
+
+
     
 
          

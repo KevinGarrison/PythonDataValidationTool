@@ -3,6 +3,7 @@ import streamlit as st
 from dataclasses import dataclass
 from backend.stats import Statistics
 import great_expectations as gx
+import openpyxl
 
 
 stats = Statistics()
@@ -10,27 +11,21 @@ stats = Statistics()
 @dataclass
 class Utilitis:
 
-
-    @st.cache_data
-    def non_numerical_data_cleaner(self):
-        '''removes all columns that are not numerical'''
-        df = st.session_state.data
-        st.session_state.data_numerical =  df.select_dtypes(include=['number'])
-
-
     @st.cache_data
     def load_data(self, uploaded_file) -> pd.DataFrame:
         '''loads the data format csv or excel into a pandas dataframe'''
         if uploaded_file is not None:
             file_path = str(uploaded_file.name)
             if file_path.endswith(".csv"):
-                st.session_state.data = pd.read_csv(uploaded_file)
+                return pd.read_csv(uploaded_file)
             elif (file_path.endswith(".xls")) | (file_path.endswith(".xlsx")):
-                st.session_state.data = pd.read_excel(uploaded_file)
+                return pd.read_excel(uploaded_file)
             else:
                 raise TypeError(f"The file has a wrong type {file_path.name}")
+                
         else:
-            raise ValueError("No file uploaded") 
+            raise ValueError("No file uploaded")
+            
     
 
     @st.cache_data
@@ -40,13 +35,13 @@ class Utilitis:
 
 
     @st.cache_data
-    def run_algorithm(self, df, approach:str):
+    def run_algorithm(self, df:pd.DataFrame, approach:str):
         '''runs the chosen algorithm for outlier detection'''
         try:
             df = df
             if approach == 'Interquartil-Range-Method':
                 ranges = stats.iqr_approach(df)
-            elif approach == 'STD-Method':
+            elif approach == 'Standard-Deviation-Method':
                 ranges = stats.std_approach(df)
             elif approach == 'Modified-Z-Score-Method':
                 ranges = stats.modified_z_score_approach(df)
