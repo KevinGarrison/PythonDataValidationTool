@@ -67,7 +67,7 @@ class Statistics:
 
 
     @st.cache_data
-    def f2(self, z: pd.Series, beta_1: int, beta_2: int, gamma: int = 3) -> pd.Series:
+    def f2(self, z: pd.Series, beta_1: int, beta_2: int, gamma: int = 2) -> pd.Series:
         """Combines z-score and isolation forest methods for outlier detection."""
         z = z
         mask_f1 = self.f1(z, gamma * beta_1, gamma * beta_2)
