@@ -39,33 +39,24 @@ class Statistics:
     
 
     @st.cache_data
-    def modified_z_score_approach(self, df, alpha: int = 3.5):
-        """Calculates modified Z-scores and defines outlier thresholds."""
+    def modified_z_score_approach(self, df, k: float = 3.5):
+        """Berechnet Modified Z-Scores und identifiziert Ausreißer."""
         df = df
+
         filter_ranges = []
 
         for column in df.columns:
             median = df[column].median()
-            
-            absolute_deviations = np.abs(df[column] - median)
-            mad = absolute_deviations.median()
-       
-            if mad == 0:
-                lower_bound = upper_bound = median 
-            else:
-                lower_bound = round(median - alpha * mad, 2)
-                upper_bound = round(median + alpha * mad, 2)
-
-            
+            mad = np.median(np.abs(df[column] - median))
             filter_ranges.append({
                 'feature': column,
-                'lower_bound': lower_bound,
-                'upper_bound': upper_bound
+                'lower_bound': round(median - k * mad / 0.6745,2),
+                'upper_bound': round(median + k * mad / 0.6745,2)
             })
         
-        return pd.DataFrame(filter_ranges)      
-
-
+        return pd.DataFrame(filter_ranges)
+           
+            
     @st.cache_data
     def f1(self, z: pd.Series, beta_1: int, beta_2: int) -> pd.Series:
         """Detects outliers based on specified z-score thresholds."""
