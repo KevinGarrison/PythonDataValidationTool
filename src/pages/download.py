@@ -67,14 +67,10 @@ if selected_feature in list(df_num.columns):
                 st.markdown(f'Expected upper bound: <span style="color: yellow;">{upper}</span>', unsafe_allow_html=True)
             case 2: 
                 st.write('Observations total:', data)
-
             case 3:
                 st.write('Unexpected observations:', data)
-
             case 4:
-                #if data > 0: 
                 st.write('Unexpected observations in %:', data)
-
             case 5:
                 if data:
                     distinct_data = set(data)
