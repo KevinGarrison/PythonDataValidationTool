@@ -80,6 +80,7 @@ class Statistics:
     def gamma_outlier(self, df, alphas: int = 6, alphak: int = 30):
         """Detects outliers using skewness and kurtosis thresholds with flexible gamma adjustments."""
         df = df
+        
         if df is None:
             st.warning("Standardized data not found. Please normalize data first.")
         filter_ranges = []
@@ -87,7 +88,7 @@ class Statistics:
             data = df[column]
             
             mean = data.mean()
-            std_dev = data.std()
+            std_dev = np.sqrt(2 * 1)
 
             z_scores = (data - mean) / std_dev
 
@@ -113,6 +114,35 @@ class Statistics:
 
         return pd.Series(iso_forest.fit_predict(z.values.reshape(-1, 1)), index=z.index) == 1
     
+    @st.cache_data
+    def gamma_method_modified(self, df, alphas: int = 6, alphak: int = 30, beta_1=3, beta_2=3, gamma=2, k=1):
+        """gets tresholds using skewness and kurtosis with flexible gamma adjustments."""
+        df = df
+        
+        filter_ranges = []
+        for column in df.columns:
+            data = df[column]
+            
+            mean = data.mean()
+            sigma = np.sqrt(2*k)
+
+            z_scores = (data - mean) / sigma
+
+            skew_result, kurt_result = abs(skew(z_scores)), abs(kurtosis(z_scores))
+            if skew_result < alphas and kurt_result < alphak:
+                filter_ranges.append({
+                'feature': column,
+                'lower_bound': round(mean - beta_1 * sigma,2),
+                'upper_bound': round(mean + beta_2 * sigma,2)
+                })
+            else:    
+                filter_ranges.append({
+                    'feature': column,
+                    'lower_bound': round(mean - gamma * beta_1 * sigma,2),
+                    'upper_bound': round(mean + gamma * beta_2 * sigma,2)
+                })
+            
+        return pd.DataFrame(filter_ranges)
 
     @st.cache_data
     def boxplot_px(self, data, ranges, column, bound_color='yellow'):

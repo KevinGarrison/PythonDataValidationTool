@@ -51,7 +51,7 @@ class Utilitis:
             elif approach == 'Modified-Z-Score-Method':
                 ranges = stats.modified_z_score_approach(df)
             elif approach == 'Advanced-Gamma-Method':
-                ranges = stats.gamma_outlier(df)
+                ranges = stats.gamma_method_modified(df)
 
             return ranges
         except:
