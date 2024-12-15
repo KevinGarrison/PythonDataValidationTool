@@ -47,11 +47,9 @@ class Utilitis:
                 ranges = stats.modified_z_score_approach(df)
             elif approach == 'Advanced-Gamma-Method':
                 ranges = stats.gamma_method_modified(df)
-
             return ranges
         except:
             print('Algorithm failed')
-
             return None
         
 

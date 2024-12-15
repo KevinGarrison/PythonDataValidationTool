@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd, numpy as np
 from backend.utils import Utilitis
 from backend.stats import Statistics
-#import time
 from app import update_method
 
 
@@ -21,10 +20,11 @@ with st.spinner("Processing... Please wait."):
     batch = st.session_state.batch_definition.get_batch(
         batch_parameters=batch_parameters
     )
-
+    st.write('Results Overview:')
+    st.write(original_ranges)
     st.session_state.data_collection = dict()
 
-    for _, row in original_ranges.iterrows():
+    for index, row in original_ranges.iterrows():
         data_collection = list()
         feature = row['feature']
         lower = row['lower_bound']
@@ -36,7 +36,7 @@ with st.spinner("Processing... Please wait."):
         data_collection.append(validation_result['success'])
         data_collection.append(validation_result['result']['element_count'])
         data_collection.append(validation_result['result']['unexpected_count'])
-        data_collection.append(round(validation_result['result']['unexpected_percent']))
+        data_collection.append(round(validation_result['result']['unexpected_percent'], 3))
         data_collection.append(validation_result['result']['partial_unexpected_list'])
         data_collection.append(validation_result['result']['partial_unexpected_counts'])  # list of dicts
         data_collection.append(validation_result['result']['partial_unexpected_index_list'])
@@ -66,16 +66,16 @@ if selected_feature in list(df_num.columns):
                 st.markdown(f'Expected lower bound: <span style="color: yellow;">{lower}</span>', unsafe_allow_html=True)
                 st.markdown(f'Expected upper bound: <span style="color: yellow;">{upper}</span>', unsafe_allow_html=True)
             case 2: 
-                st.write('Observations total:', data)
+                st.markdown(f'Observations total: <span style="color:white;">{data}</span>', unsafe_allow_html=True)
             case 3:
-                st.write('Unexpected observations:', data)
+                st.markdown(f'Unexpected observations: <span style="color:white;">{data}</span>', unsafe_allow_html=True)
             case 4:
-                st.write('Unexpected observations in %:', data)
+                st.markdown(f'Unexpected observations in %: <span style="color:white;">{data}</span>', unsafe_allow_html=True)
             case 5:
                 if data:
                     distinct_data = set(data)
                     formatted_text_distinct =  ', '.join(map(str, distinct_data)) 
-                    st.markdown(f'Unexpected values as distinct list: <span style="color:green;">[{formatted_text_distinct}]</span>', unsafe_allow_html=True)
+                    st.markdown(f'Unexpected values as distinct list: <span style="color:white;">[{formatted_text_distinct}]</span>', unsafe_allow_html=True)
             case 6:
                 if data: 
                     df = pd.DataFrame(data)

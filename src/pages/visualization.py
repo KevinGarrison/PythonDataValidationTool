@@ -17,7 +17,7 @@ selected_feature = st.selectbox('Select a specific feature to visualize:', selec
 
 if selected_feature in list(data.columns):
     
-    distributions = ['norm', 'chisquare', 'expon', 'uniform', 't']
+    distributions = ['norm', 'chisquare', 'expon', 'uniform', 't', 'lognorm', 'pareto']
 
     selected_dist = st.selectbox('Select a distribution for the QQ-Plot:', distributions)
 
@@ -26,27 +26,20 @@ if selected_feature in list(data.columns):
 
     bins = st.slider('Select number of bins for the histogram:', min_value=5, max_value=30, value=5) 
 
-    fig = px.histogram(data, x=selected_feature, nbins=bins, 
-                    title=f'Histogram of {selected_feature} Distribution',
-                    color_discrete_sequence=['white'],
-                    marginal='box',
-                    width=1400,
-                    height=500
-                    )  
+    stats_obj.plot_histogram_with_theoretical(data=data, selected_feature=selected_feature, bins=bins, dist_name=selected_dist)
 
-    fig.update_traces(marker=dict(line=dict(color='black', width=1)))
-    fig.update_layout(xaxis_title=selected_feature, yaxis_title='Frequency')
-
-    st.plotly_chart(fig)
     selections_plot = ['Box Plot', 'Violin Plot']
     plot = st.selectbox('Select a Chart', selections_plot)
 
     if plot == 'Box Plot':
         fig_chart = px.box(data, y=selected_feature, title=f'Box Plot of {selected_feature}')
+        fig_chart.update_traces(marker=dict(color='blue'))  
     elif plot == 'Violin Plot':
         fig_chart = px.violin(data, y=selected_feature, title=f'Violin Plot of {selected_feature}')
+        fig_chart.update_traces(marker=dict(color='blue'))
     if fig_chart is not None:
         st.plotly_chart(fig_chart)
+
        
 st.selectbox(
     label='Choose method to determine feature ranges:',

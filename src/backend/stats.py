@@ -114,7 +114,7 @@ class Statistics:
         return pd.Series(iso_forest.fit_predict(z.values.reshape(-1, 1)), index=z.index) == 1
     
     @st.cache_data
-    def gamma_method_modified(self, df, alphas: int = 6, alphak: int = 30, beta_1=2, beta_2=2, gamma=2, k=1):
+    def gamma_method_modified(self, df, alphas: int = 6, alphak: int = 30, beta_1=2, beta_2=2, gamma=2):
         """gets tresholds using skewness and kurtosis with flexible gamma adjustments."""
         df = df.select_dtypes(include=['number'])
         
@@ -172,7 +172,7 @@ class Statistics:
                     height=500)  
         
         fig.update_traces(
-        marker=dict(color='green'),  
+        marker=dict(color='blue'),  
         line=dict(color='white')     
         )
 
@@ -190,8 +190,78 @@ class Statistics:
         st.plotly_chart(fig)
 
 
+
+    # Example function to plot histogram with theoretical distributions
+    def plot_histogram_with_theoretical(self, data, selected_feature, bins=30, dist_name='norm'):
+        # Create the histogram plot
+        fig = px.histogram(data, x=selected_feature, nbins=bins, 
+                            title=f'Histogram of {selected_feature} Distribution',
+                            color_discrete_sequence=['white'],
+                            marginal='box',
+                            width=1400,
+                            height=500)
+
+        fig.update_traces(marker=dict(line=dict(color='black', width=1)))
+        fig.update_layout(xaxis_title=selected_feature, yaxis_title='Frequency')
+
+        # Convert data to numpy array for easier handling
+        np_array_data = np.array(data[selected_feature])
+        x_values = np.linspace(min(np_array_data), max(np_array_data), 1000)
+
+        # Fit and compute the theoretical distribution based on the selected dist_name
+        if dist_name == 'norm':
+            # Fit a normal distribution (mean, std)
+            mean, std = np.mean(np_array_data), np.std(np_array_data)
+            pdf = stats.norm.pdf(x_values, loc=mean, scale=std)
+
+        elif dist_name == 'chisquare':
+            # Fit a chi-square distribution (degrees of freedom)
+            df = len(np_array_data) - 1  # Sample size - 1 for degrees of freedom
+            pdf = stats.chi2.pdf(x_values, df)
+
+        elif dist_name == 'expon':
+            # Fit an exponential distribution (scale)
+            scale = np.mean(np_array_data)
+            pdf = stats.expon.pdf(x_values, scale=scale)
+
+        elif dist_name == 'uniform':
+            # Fit a uniform distribution (min and max)
+            low, high = np.min(np_array_data), np.max(np_array_data)
+            pdf = stats.uniform.pdf(x_values, loc=low, scale=high - low)
+
+        elif dist_name == 't':
+            # Fit a t-distribution (degrees of freedom)
+            df = len(np_array_data) - 1
+            pdf = stats.t.pdf(x_values, df)
+
+        elif dist_name == 'lognorm':
+            # Log-normal distribution requires strictly positive data
+            if np.any(np_array_data <= 0):
+                st.warning("Log-normal fitting requires strictly positive values. Adjusting data by adding a constant to shift values.")
+                np_array_data = np_array_data + abs(np.min(np_array_data)) + 1 
+
+        elif dist_name == 'pareto':
+            # Fit a Pareto distribution (shape, scale)
+            shape, loc, scale = stats.pareto.fit(np_array_data, floc=0)
+            pdf = stats.pareto.pdf(x_values, b=shape, scale=scale)
+
+        else:
+            st.warning(f"The distribution '{dist_name}' is not supported.")
+            return
+
+        # Normalize the PDF to match the histogram's scale
+        pdf = pdf * len(np_array_data) * (max(np_array_data) - min(np_array_data)) / bins
+
+        # Add the theoretical distribution PDF as a line on the histogram
+        fig.add_scatter(x=x_values, y=pdf, mode='lines', line=dict(color='blue', width=2), name=f'{dist_name.capitalize()} PDF')
+
+        # Show the plot
+        st.plotly_chart(fig)
+
+
+
     @st.cache_data
-    def qq_plot(self, dist_name, data, sample_size,  random_state=42):
+    def qq_plot(self, dist_name, data, sample_size, random_state=42):
         data = data
 
         np.random.seed(random_state)
@@ -202,7 +272,6 @@ class Statistics:
             params = {'mean': np.mean(data), 'std': np.std(data)}
         elif dist_name == 'chisquare':
             # Estimate degrees of freedom for Chi-squared distribution
-            # Use the formula for the degrees of freedom estimate: df = (n * sample variance) / mean
             params = {'df': np.mean(data) ** 2 / np.var(data)}
         elif dist_name == 'expon':
             # Estimate scale parameter for exponential distribution
@@ -212,8 +281,15 @@ class Statistics:
             params = {'low': np.min(data), 'high': np.max(data)}
         elif dist_name == 't':
             # Estimate degrees of freedom for t-distribution
-            # This is a rough estimate for a sample from a t-distribution
             params = {'df': sample_size - 1}
+        elif dist_name == 'lognorm':
+            # Estimate shape, loc, and scale for log-normal distribution
+            shape, loc, scale = stats.lognorm.fit(data, floc=0)  # Fix location to 0 for simpler estimation
+            params = {'shape': shape, 'scale': scale}
+        elif dist_name == 'pareto':
+            # Estimate shape (alpha) for Pareto distribution
+            shape, loc, scale = stats.pareto.fit(data, floc=0)  # Fix location to 0 for simpler estimation
+            params = {'shape': shape, 'scale': scale}
         
         st.write(f"Estimated parameters for {dist_name.capitalize()} distribution: {params}")
         
@@ -225,9 +301,13 @@ class Statistics:
         elif dist_name == 'expon':
             theoretical_quantiles = stats.expon.ppf(np.linspace(0.01, 0.99, sample_size), scale=params['scale'])
         elif dist_name == 'uniform':
-            theoretical_quantiles = stats.uniform.ppf(np.linspace(0.01, 0.99, sample_size), loc=params['low'], scale=params['high']-params['low'])
+            theoretical_quantiles = stats.uniform.ppf(np.linspace(0.01, 0.99, sample_size), loc=params['low'], scale=params['high'] - params['low'])
         elif dist_name == 't':
             theoretical_quantiles = stats.t.ppf(np.linspace(0.01, 0.99, sample_size), df=params['df'])
+        elif dist_name == 'lognorm':
+            theoretical_quantiles = stats.lognorm.ppf(np.linspace(0.01, 0.99, sample_size), s=params['shape'], scale=params['scale'])
+        elif dist_name == 'pareto':
+            theoretical_quantiles = stats.pareto.ppf(np.linspace(0.01, 0.99, sample_size), b=params['shape'], scale=params['scale'])
         
         # Sort the sample values
         sorted_samples = np.sort(data)
@@ -238,22 +318,24 @@ class Statistics:
             'Sample Quantiles': sorted_samples
         })
         
-        # Create the QQ plot using Plotly Express
         fig = px.scatter(df, x='Theoretical Quantiles', y='Sample Quantiles',
-                        title=f'QQ Plot for {dist_name.capitalize()} Distribution',
-                        labels={'Theoretical Quantiles': 'Theoretical Quantiles',
-                                'Sample Quantiles': 'Sample Quantiles'})
+                 title=f'QQ Plot for {dist_name.capitalize()} Distribution',
+                 labels={'Theoretical Quantiles': 'Theoretical Quantiles',
+                         'Sample Quantiles': 'Sample Quantiles'},
+                 color_discrete_sequence=['blue'])  # Set color to blue
+
         
         # Add a line for perfect agreement
         fig.add_scatter(x=theoretical_quantiles, y=theoretical_quantiles,
                         mode='lines', name='45-degree line', line=dict(dash='dash', color='red'))
         
         fig.update_layout(
-        width=1400,  # Set the width of the plot
-        height=500,  # Set the height of the plot
+            width=1400,  # Set the width of the plot
+            height=500,  # Set the height of the plot
         )
         # Show the plot
         st.plotly_chart(fig)
+
 
 
 
