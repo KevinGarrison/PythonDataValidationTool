@@ -6,6 +6,7 @@ from scipy.stats import skew, kurtosis
 import numpy as np
 import plotly.express as px
 import scipy.stats as stats
+from backend.colors import ColorPalette
 
 @dataclass
 class Statistics:
@@ -129,14 +130,12 @@ class Statistics:
 
             skew_result, kurt_result = abs(skew(z_scores)), abs(kurtosis(z_scores))
             if skew_result < alphas and kurt_result < alphak:
-                st.write('Opt1')
                 filter_ranges.append({
                 'feature': column,
                 'lower_bound': round(mean - beta_1 * sigma,2),
                 'upper_bound': round(mean + beta_2 * sigma,2)
                 })
             else:
-                st.write('Opt2')    
                 filter_ranges.append({
                     'feature': column,
                     'lower_bound': round(mean - gamma * beta_1 * sigma,2),
@@ -146,7 +145,7 @@ class Statistics:
         return pd.DataFrame(filter_ranges)
 
     @st.cache_data
-    def boxplot_px(self, data, ranges, column, bound_color='yellow'):
+    def boxplot_px(self, data, ranges, column, bound_color='color_bounds_boxplot'):
         
         data = data
         np_array_data = np.array(data[column])  
@@ -158,13 +157,11 @@ class Statistics:
         lower_bound = row['lower_bound'].values[0]
         upper_bound = row['upper_bound'].values[0]
 
-       
         box_data = pd.DataFrame({
             'Values': sorted_data,
             'Type': ['Normal'] * len(sorted_data)
         })
 
-       
         fig = px.box(box_data, x='Values', color='Type', 
                     title=f'Boxplot for {column}',
                     points='all',
@@ -172,15 +169,27 @@ class Statistics:
                     height=500)  
         
         fig.update_traces(
-        marker=dict(color='blue'),  
-        line=dict(color='white')     
+            marker=dict(color=ColorPalette.get_color_hex('datapoints_boxplot')),  
+            line=dict(color=ColorPalette.get_color_hex('boxplot'))  
         )
 
-       
-        fig.add_vline(x=lower_bound, line_color=bound_color, line_width=2, line_dash="dash", annotation_text="Lower Bound", annotation_position="top right")
-        fig.add_vline(x=upper_bound, line_color=bound_color, line_width=2, line_dash="dash", annotation_text="Upper Bound", annotation_position="top right")
+        fig.add_vline(
+            x=lower_bound,
+            line_color=ColorPalette.get_color_hex(bound_color),
+            line_width=2,
+            line_dash="dash",
+            annotation_text="Lower Bound",
+            annotation_position="top right"
+        )
+        fig.add_vline(
+            x=upper_bound,
+            line_color=ColorPalette.get_color_hex(bound_color),
+            line_width=2,
+            line_dash="dash",
+            annotation_text="Upper Bound",
+            annotation_position="top right"
+        )
 
-       
         fig.update_layout(
             xaxis_title='Values',
             yaxis_title='',
@@ -193,69 +202,53 @@ class Statistics:
 
     # Example function to plot histogram with theoretical distributions
     def plot_histogram_with_theoretical(self, data, selected_feature, bins=30, dist_name='norm'):
-        # Create the histogram plot
-        fig = px.histogram(data, x=selected_feature, nbins=bins, 
-                            title=f'Histogram of {selected_feature} Distribution',
-                            color_discrete_sequence=['white'],
-                            marginal='box',
-                            width=1400,
-                            height=500)
+    
+        fig = px.histogram(
+            data,
+            x=selected_feature,
+            nbins=bins,
+            title=f'Histogram of {selected_feature} Distribution',
+            color_discrete_sequence=[ColorPalette.get_color_hex('histogram')],
+            marginal='box',
+            width=1400,
+            height=500
+        )
 
-        fig.update_traces(marker=dict(line=dict(color='black', width=1)))
+        fig.update_traces(marker=dict(line=dict(color=ColorPalette.get_color_hex('datapoints_histogram'), width=1)))
         fig.update_layout(xaxis_title=selected_feature, yaxis_title='Frequency')
 
-        # Convert data to numpy array for easier handling
         np_array_data = np.array(data[selected_feature])
         x_values = np.linspace(min(np_array_data), max(np_array_data), 1000)
 
-        # Fit and compute the theoretical distribution based on the selected dist_name
         if dist_name == 'norm':
-            # Fit a normal distribution (mean, std)
             mean, std = np.mean(np_array_data), np.std(np_array_data)
             pdf = stats.norm.pdf(x_values, loc=mean, scale=std)
-
         elif dist_name == 'chisquare':
-            # Fit a chi-square distribution (degrees of freedom)
-            df = len(np_array_data) - 1  # Sample size - 1 for degrees of freedom
+            df = len(np_array_data) - 1
             pdf = stats.chi2.pdf(x_values, df)
-
         elif dist_name == 'expon':
-            # Fit an exponential distribution (scale)
             scale = np.mean(np_array_data)
             pdf = stats.expon.pdf(x_values, scale=scale)
-
         elif dist_name == 'uniform':
-            # Fit a uniform distribution (min and max)
             low, high = np.min(np_array_data), np.max(np_array_data)
             pdf = stats.uniform.pdf(x_values, loc=low, scale=high - low)
-
         elif dist_name == 't':
-            # Fit a t-distribution (degrees of freedom)
             df = len(np_array_data) - 1
             pdf = stats.t.pdf(x_values, df)
-
         elif dist_name == 'lognorm':
-            # Log-normal distribution requires strictly positive data
-            if np.any(np_array_data <= 0):
-                st.warning("Log-normal fitting requires strictly positive values. Adjusting data by adding a constant to shift values.")
-                np_array_data = np_array_data + abs(np.min(np_array_data)) + 1 
+            shape, loc, scale = stats.lognorm.fit(np_array_data, floc=0)  
+            pdf = stats.lognorm.pdf(x_values, s=shape, loc=loc, scale=scale)
 
-        elif dist_name == 'pareto':
-            # Fit a Pareto distribution (shape, scale)
-            shape, loc, scale = stats.pareto.fit(np_array_data, floc=0)
-            pdf = stats.pareto.pdf(x_values, b=shape, scale=scale)
-
-        else:
-            st.warning(f"The distribution '{dist_name}' is not supported.")
-            return
-
-        # Normalize the PDF to match the histogram's scale
         pdf = pdf * len(np_array_data) * (max(np_array_data) - min(np_array_data)) / bins
 
-        # Add the theoretical distribution PDF as a line on the histogram
-        fig.add_scatter(x=x_values, y=pdf, mode='lines', line=dict(color='blue', width=2), name=f'{dist_name.capitalize()} PDF')
+        fig.add_scatter(
+            x=x_values,
+            y=pdf,
+            mode='lines',
+            line=dict(color=ColorPalette.get_color_hex('datapoints_histogram'), width=2),
+            name=f'{dist_name.capitalize()} PDF'
+        )
 
-        # Show the plot
         st.plotly_chart(fig)
 
 
@@ -286,10 +279,7 @@ class Statistics:
             # Estimate shape, loc, and scale for log-normal distribution
             shape, loc, scale = stats.lognorm.fit(data, floc=0)  # Fix location to 0 for simpler estimation
             params = {'shape': shape, 'scale': scale}
-        elif dist_name == 'pareto':
-            # Estimate shape (alpha) for Pareto distribution
-            shape, loc, scale = stats.pareto.fit(data, floc=0)  # Fix location to 0 for simpler estimation
-            params = {'shape': shape, 'scale': scale}
+
         
         st.write(f"Estimated parameters for {dist_name.capitalize()} distribution: {params}")
         
@@ -306,8 +296,7 @@ class Statistics:
             theoretical_quantiles = stats.t.ppf(np.linspace(0.01, 0.99, sample_size), df=params['df'])
         elif dist_name == 'lognorm':
             theoretical_quantiles = stats.lognorm.ppf(np.linspace(0.01, 0.99, sample_size), s=params['shape'], scale=params['scale'])
-        elif dist_name == 'pareto':
-            theoretical_quantiles = stats.pareto.ppf(np.linspace(0.01, 0.99, sample_size), b=params['shape'], scale=params['scale'])
+
         
         # Sort the sample values
         sorted_samples = np.sort(data)
@@ -322,12 +311,12 @@ class Statistics:
                  title=f'QQ Plot for {dist_name.capitalize()} Distribution',
                  labels={'Theoretical Quantiles': 'Theoretical Quantiles',
                          'Sample Quantiles': 'Sample Quantiles'},
-                 color_discrete_sequence=['blue'])  # Set color to blue
+                 color_discrete_sequence=[ColorPalette.get_color_hex('qq_plot')])  # Set color to blue
 
         
         # Add a line for perfect agreement
         fig.add_scatter(x=theoretical_quantiles, y=theoretical_quantiles,
-                        mode='lines', name='45-degree line', line=dict(dash='dash', color='red'))
+                        mode='lines', name='45-degree line', line=dict(dash='dash', color=ColorPalette.get_color_hex('qq_plot')))
         
         fig.update_layout(
             width=1400,  # Set the width of the plot

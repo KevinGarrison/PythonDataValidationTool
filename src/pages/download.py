@@ -8,7 +8,7 @@ from app import update_method
 utils = Utilitis()
 stats = Statistics()
 
-st.header("Recommended Feature Ranges")
+st.header("Recommended Feature Ranges", divider="rainbow")
 
 data = st.session_state.data
 
@@ -20,8 +20,8 @@ with st.spinner("Processing... Please wait."):
     batch = st.session_state.batch_definition.get_batch(
         batch_parameters=batch_parameters
     )
-    st.write('Results Overview:')
-    st.write(original_ranges)
+    st.write('Results Overview:', divider="rainbow")
+    st.write(original_ranges, divider="rainbow")
     st.session_state.data_collection = dict()
 
     for index, row in original_ranges.iterrows():
@@ -51,11 +51,11 @@ df_num = st.session_state.data
 
 if selected_feature in list(df_num.columns):
     if st.session_state.data_collection[selected_feature][1] == True:
-        st.subheader(f'Data range for **{selected_feature}** meets expectations with approach:')
-        st.markdown(f"<h2 style='color: yellow;'>{st.session_state.selected_method}</h2>", unsafe_allow_html=True)
+        st.write(f'Data range for **{selected_feature}** meets expectations with approach:', divider="rainbow")
+        st.write(f"{st.session_state.selected_method}", divider="rainbow")
     else:
-        st.subheader(f'Data range for **{selected_feature}** is not as expected with approach:')
-        st.markdown(f"<h2 style='color: yellow;'>{st.session_state.selected_method}</h2>", unsafe_allow_html=True)
+        st.write(f'Data range for **{selected_feature}** is not as expected with approach:', divider="rainbow")
+        st.write(f"{st.session_state.selected_method}", divider="rainbow")
     stats.boxplot_px(df_num, original_ranges, selected_feature)
     
     for i, data in enumerate(st.session_state.data_collection[selected_feature]):
@@ -63,24 +63,24 @@ if selected_feature in list(df_num.columns):
             case 0:
                 lower = data['lower_bound'][0]
                 upper = data['upper_bound'][0]
-                st.markdown(f'Expected lower bound: <span style="color: yellow;">{lower}</span>', unsafe_allow_html=True)
-                st.markdown(f'Expected upper bound: <span style="color: yellow;">{upper}</span>', unsafe_allow_html=True)
+                st.write(f'Expected lower bound: {lower}', divider="rainbow")
+                st.write(f'Expected upper bound: {upper}', divider="rainbow")
             case 2: 
-                st.markdown(f'Observations total: <span style="color:white;">{data}</span>', unsafe_allow_html=True)
+                st.write(f'Observations total: {data}', divider="rainbow")
             case 3:
-                st.markdown(f'Unexpected observations: <span style="color:white;">{data}</span>', unsafe_allow_html=True)
+                st.write(f'Unexpected observations: {data}', divider="rainbow")
             case 4:
-                st.markdown(f'Unexpected observations in %: <span style="color:white;">{data}</span>', unsafe_allow_html=True)
+                st.write(f'Unexpected observations in %: {data}', divider="rainbow")
             case 5:
                 if data:
                     distinct_data = set(data)
                     formatted_text_distinct =  ', '.join(map(str, distinct_data)) 
-                    st.markdown(f'Unexpected values as distinct list: <span style="color:white;">[{formatted_text_distinct}]</span>', unsafe_allow_html=True)
+                    st.write(f'Unexpected values as distinct list: [{formatted_text_distinct}]', divider="rainbow")
             case 6:
                 if data: 
                     df = pd.DataFrame(data)
                     sorted_df = df.sort_values(by='value')
-                    st.write(sorted_df)
+                    st.write(sorted_df, divider="rainbow")
 
 st.selectbox(
     label='Choose method to determine feature ranges:',

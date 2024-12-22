@@ -1,7 +1,7 @@
 import streamlit as st
 from app import update_method
 
-st.header("Statistics of your data (only numerical).")
+st.header("Statistics of your data (only numerical).", divider="rainbow")
 
 df = st.session_state.data
 df = df.select_dtypes(include=['number'])
@@ -11,10 +11,10 @@ selected_feature = st.selectbox('Select a feature to get the statistics:', selec
 
 if selected_feature == "All data":
     description = df.describe()
-    st.write(description)
+    st.write(description, divider="rainbow")
 if selected_feature in list(df.columns):
     description = df.describe() 
-    st.write(description[selected_feature])
+    st.write(description[selected_feature], divider="rainbow")
 
 
 

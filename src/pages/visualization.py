@@ -5,7 +5,7 @@ from app import update_method
 
 stats_obj = stats.Statistics()
 
-st.header("Visualization of your data") 
+st.header("Visualization of your data", divider="rainbow") 
 
 data = st.session_state.data
 
@@ -17,7 +17,7 @@ selected_feature = st.selectbox('Select a specific feature to visualize:', selec
 
 if selected_feature in list(data.columns):
     
-    distributions = ['norm', 'chisquare', 'expon', 'uniform', 't', 'lognorm', 'pareto']
+    distributions = ['norm', 'chisquare', 'expon', 'uniform', 't', 'lognorm']
 
     selected_dist = st.selectbox('Select a distribution for the QQ-Plot:', distributions)
 

@@ -40,14 +40,14 @@ if 'page' not in st.session_state:
 
 if st.session_state.page == 'upload':
 
-    st.title("Numerical Data Validation Tool")
-    st.text("Upload your data below:")
+    st.header("Numerical Data Validation Tool", divider="rainbow")
+    st.write("Upload your data below:", divider="rainbow")
     uploaded_file = st.file_uploader(label="Choose a file", type=['csv', 'xls', 'xlsx']) 
     if uploaded_file is not None:
         df = utils.load_data(uploaded_file=uploaded_file)
         st.session_state.data = df
-        st.subheader("Dataset:")
-        st.write(df)
+        st.write("Dataset:", divider="rainbow")
+        st.write(df, divider="rainbow")
         st.selectbox(
         label='Choose method to determine feature ranges (only for numerical values):',
         options=['Interquartil-Range-Method', 'Standard-Deviation-Method', 'Modified-Z-Score-Method', 'Advanced-Gamma-Method'],
