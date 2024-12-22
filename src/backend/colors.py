@@ -18,6 +18,9 @@ class ColorPalette:
 
         "qq_plot": (31, 119, 180),  # Blau
         "degree_45_line": (214, 39, 40),  # Rot
+
+        "boxplot_2": (31, 119, 180),  # Blau
+        "violinplot": (31, 119, 180),  # Blau
     }
 
     @staticmethod

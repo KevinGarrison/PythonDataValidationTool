@@ -29,7 +29,7 @@ with st.spinner("Processing... Please wait."):
         feature = row['feature']
         lower = row['lower_bound']
         upper = row['upper_bound']
-        datapoint = pd.DataFrame({'feature': [feature], 'lower_bound': [lower], 'upper_bound': [upper]})
+        datapoint = pd.DataFrame({'feature': [feature], 'recommended lower bound': [lower], 'recommended upper bound': [upper]})
         expectation_min_max = utils.define_column_values_between_exp(column=feature, min=lower, max=upper)
         validation_result = batch.validate(expectation_min_max)
         data_collection.append(datapoint)
@@ -61,8 +61,8 @@ if selected_feature in list(df_num.columns):
     for i, data in enumerate(st.session_state.data_collection[selected_feature]):
         match i:
             case 0:
-                lower = data['lower_bound'][0]
-                upper = data['upper_bound'][0]
+                lower = data['recommended lower bound'][0]
+                upper = data['recommended upper bound'][0]
                 st.write(f'Expected lower bound: {lower}', divider="rainbow")
                 st.write(f'Expected upper bound: {upper}', divider="rainbow")
             case 2: 

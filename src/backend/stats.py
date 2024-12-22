@@ -281,7 +281,6 @@ class Statistics:
             params = {'shape': shape, 'scale': scale}
 
         
-        st.write(f"Estimated parameters for {dist_name.capitalize()} distribution: {params}")
         
         # Compute theoretical quantiles based on the estimated parameters
         if dist_name == 'norm':
@@ -316,7 +315,7 @@ class Statistics:
         
         # Add a line for perfect agreement
         fig.add_scatter(x=theoretical_quantiles, y=theoretical_quantiles,
-                        mode='lines', name='45-degree line', line=dict(dash='dash', color=ColorPalette.get_color_hex('qq_plot')))
+                        mode='lines', name='45-degree line', line=dict(dash='dash', color=ColorPalette.get_color_hex('degree_45_line')))
         
         fig.update_layout(
             width=1400,  # Set the width of the plot
