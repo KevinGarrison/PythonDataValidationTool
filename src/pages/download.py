@@ -20,8 +20,8 @@ with st.spinner("Processing... Please wait."):
     batch = st.session_state.batch_definition.get_batch(
         batch_parameters=batch_parameters
     )
-    st.write('Results Overview:', divider="rainbow")
-    st.write(original_ranges, divider="rainbow")
+    st.write('Results Overview:',)
+    st.write(original_ranges,)
     st.session_state.data_collection = dict()
 
     for index, row in original_ranges.iterrows():
@@ -51,11 +51,11 @@ df_num = st.session_state.data
 
 if selected_feature in list(df_num.columns):
     if st.session_state.data_collection[selected_feature][1] == True:
-        st.write(f'Data range for **{selected_feature}** meets expectations with approach:', divider="rainbow")
-        st.write(f"{st.session_state.selected_method}", divider="rainbow")
+        st.write(f'Data range for **{selected_feature}** meets expectations with approach:',)
+        st.write(f"{st.session_state.selected_method}",)
     else:
-        st.write(f'Data range for **{selected_feature}** is not as expected with approach:', divider="rainbow")
-        st.write(f"{st.session_state.selected_method}", divider="rainbow")
+        st.write(f'Data range for **{selected_feature}** is not as expected with approach:',)
+        st.write(f"{st.session_state.selected_method}",)
     stats.boxplot_px(df_num, original_ranges, selected_feature)
     
     for i, data in enumerate(st.session_state.data_collection[selected_feature]):
@@ -63,24 +63,24 @@ if selected_feature in list(df_num.columns):
             case 0:
                 lower = data['recommended lower bound'][0]
                 upper = data['recommended upper bound'][0]
-                st.write(f'Expected lower bound: {lower}', divider="rainbow")
-                st.write(f'Expected upper bound: {upper}', divider="rainbow")
+                st.write(f'Expected lower bound: {lower}',)
+                st.write(f'Expected upper bound: {upper}',)
             case 2: 
-                st.write(f'Observations total: {data}', divider="rainbow")
+                st.write(f'Observations total: {data}',)
             case 3:
-                st.write(f'Unexpected observations: {data}', divider="rainbow")
+                st.write(f'Unexpected observations: {data}',)
             case 4:
-                st.write(f'Unexpected observations in %: {data}', divider="rainbow")
+                st.write(f'Unexpected observations in %: {data}',)
             case 5:
                 if data:
                     distinct_data = set(data)
                     formatted_text_distinct =  ', '.join(map(str, distinct_data)) 
-                    st.write(f'Unexpected values as distinct list: [{formatted_text_distinct}]', divider="rainbow")
+                    st.write(f'Unexpected values as distinct list: [{formatted_text_distinct}]',)
             case 6:
                 if data: 
                     df = pd.DataFrame(data)
                     sorted_df = df.sort_values(by='value')
-                    st.write(sorted_df, divider="rainbow")
+                    st.write(sorted_df,)
 
 st.selectbox(
     label='Choose method to determine feature ranges:',
