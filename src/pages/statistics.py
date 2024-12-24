@@ -11,10 +11,10 @@ selected_feature = st.selectbox('Select a feature to get the statistics:', selec
 
 if selected_feature == "All data":
     description = df.describe()
-    st.write(description, divider="rainbow")
+    st.write(description,)
 if selected_feature in list(df.columns):
     description = df.describe() 
-    st.write(description[selected_feature], divider="rainbow")
+    st.write(description[selected_feature],)
 
 
 

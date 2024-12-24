@@ -1,7 +1,6 @@
 import pandas as pd, numpy as np
 import streamlit as st
 from dataclasses import dataclass
-from sklearn.ensemble import IsolationForest
 from scipy.stats import skew, kurtosis
 import numpy as np
 import plotly.express as px
@@ -58,61 +57,6 @@ class Statistics:
         
         return pd.DataFrame(filter_ranges)
            
-            
-    @st.cache_data
-    def f1(self, z: pd.Series, beta_1: int, beta_2: int) -> pd.Series:
-        """Detects outliers based on specified z-score thresholds."""
-        z = z
-        anomaly_mask = (z <= (-beta_1)) | (z >= beta_2)
-
-        return anomaly_mask
-
-
-    @st.cache_data
-    def f2(self, z: pd.Series, beta_1: int, beta_2: int, gamma: int = 2) -> pd.Series:
-        """Combines z-score and isolation forest methods for outlier detection."""
-        z = z
-        mask_f1 = self.f1(z, gamma * beta_1, gamma * beta_2)
-        mask_iforest = self.isolation_forest(z)
-
-        return mask_f1 & mask_iforest
-
-
-    @st.cache_data
-    def gamma_outlier(self, df, alphas: int = 6, alphak: int = 30):
-        """Detects outliers using skewness and kurtosis thresholds with flexible gamma adjustments."""
-        df = df
-        
-        filter_ranges = []
-        for column in df.columns:
-            data = df[column]
-            
-            mean = data.mean()
-            std_dev = np.sqrt(2 * 1)
-
-            z_scores = (data - mean) / std_dev
-
-            skew_result, kurt_result = abs(skew(z_scores)), abs(kurtosis(z_scores))
-            if skew_result < alphas and kurt_result < alphak:
-                mask = self.f1(z_scores, beta_1=3, beta_2=3)
-            else:
-                mask = self.f2(z_scores, beta_1=3, beta_2=3, gamma=2)
-            filtered_data = data[~mask]
-            filter_ranges.append({
-                'feature': column,
-                'lower_bound': round(filtered_data.min(),2),
-                'upper_bound': round(filtered_data.max(),2)
-            })
-            
-        return pd.DataFrame(filter_ranges)
-
-
-    @st.cache_data
-    def isolation_forest(self, z: pd.Series) -> pd.Series:
-        """Detects outliers using the Isolation Forest algorithm."""
-        iso_forest = IsolationForest(random_state=42)
-
-        return pd.Series(iso_forest.fit_predict(z.values.reshape(-1, 1)), index=z.index) == 1
     
     @st.cache_data
     def gamma_method_modified(self, df, alphas: int = 6, alphak: int = 30, beta_1=2, beta_2=2, gamma=2):
