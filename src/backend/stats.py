@@ -1,8 +1,6 @@
 import pandas as pd, numpy as np
 import streamlit as st
 from dataclasses import dataclass
-from scipy.stats import skew, kurtosis
-import numpy as np
 import plotly.express as px
 import scipy.stats as stats
 from backend.colors import ColorPalette
@@ -72,7 +70,7 @@ class Statistics:
 
             z_scores = (data - mean) / sigma
 
-            skew_result, kurt_result = abs(skew(z_scores)), abs(kurtosis(z_scores))
+            skew_result, kurt_result = abs(stats.skew(z_scores)), abs(stats.kurtosis(z_scores))
             if skew_result < alphas and kurt_result < alphak:
                 filter_ranges.append({
                 'feature': column,
