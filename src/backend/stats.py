@@ -174,12 +174,6 @@ class Statistics:
         elif dist_name == 'uniform':
             low, high = np.min(np_array_data), np.max(np_array_data)
             pdf = stats.uniform.pdf(x_values, loc=low, scale=high - low)
-        elif dist_name == 't':
-            df = len(np_array_data) - 1
-            pdf = stats.t.pdf(x_values, df)
-        elif dist_name == 'lognorm':
-            shape, loc, scale = stats.lognorm.fit(np_array_data, floc=0)  
-            pdf = stats.lognorm.pdf(x_values, s=shape, loc=loc, scale=scale)
 
         pdf = pdf * len(np_array_data) * (max(np_array_data) - min(np_array_data)) / bins
 
@@ -214,14 +208,6 @@ class Statistics:
         elif dist_name == 'uniform':
             # Estimate low and high for uniform distribution
             params = {'low': np.min(data), 'high': np.max(data)}
-        elif dist_name == 't':
-            # Estimate degrees of freedom for t-distribution
-            params = {'df': sample_size - 1}
-        elif dist_name == 'lognorm':
-            # Estimate shape, loc, and scale for log-normal distribution
-            shape, loc, scale = stats.lognorm.fit(data, floc=0)  # Fix location to 0 for simpler estimation
-            params = {'shape': shape, 'scale': scale}
-
         
         
         # Compute theoretical quantiles based on the estimated parameters
@@ -233,10 +219,6 @@ class Statistics:
             theoretical_quantiles = stats.expon.ppf(np.linspace(0.01, 0.99, sample_size), scale=params['scale'])
         elif dist_name == 'uniform':
             theoretical_quantiles = stats.uniform.ppf(np.linspace(0.01, 0.99, sample_size), loc=params['low'], scale=params['high'] - params['low'])
-        elif dist_name == 't':
-            theoretical_quantiles = stats.t.ppf(np.linspace(0.01, 0.99, sample_size), df=params['df'])
-        elif dist_name == 'lognorm':
-            theoretical_quantiles = stats.lognorm.ppf(np.linspace(0.01, 0.99, sample_size), s=params['shape'], scale=params['scale'])
 
         
         # Sort the sample values

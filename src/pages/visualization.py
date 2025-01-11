@@ -18,7 +18,7 @@ selected_feature = st.selectbox('Select a specific feature to visualize:', selec
 
 if selected_feature in list(data.columns):
     
-    distributions = ['norm', 'chisquare', 'expon', 'uniform', 't', 'lognorm']
+    distributions = ['norm', 'chisquare', 'expon', 'uniform']
 
     selected_dist = st.selectbox('Select a distribution for the histogram:', distributions)
 
