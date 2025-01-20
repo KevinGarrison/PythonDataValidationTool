@@ -36,28 +36,28 @@ st.header("Numerical Data Validation Tool", divider="rainbow")
 st.write("Upload your data below:",)
 uploaded_file = st.file_uploader(label="Choose a file", type=['csv', 'xls', 'xlsx']) 
 
-if uploaded_file is not None or not st.session_state.data.empty:
+if uploaded_file is not None:
     df = utils.load_data(uploaded_file=uploaded_file)
     st.session_state.data = df
     st.write("Dataset:",)
     st.write(df,)
-    st.selectbox(
-    label='Choose method to determine feature ranges (only for numerical values):',
-    options=['Interquartil-Range-Method', 'Standard-Deviation-Method', 'Modified-Z-Score-Method', 'Advanced-Gamma-Method'],
-    key='method_selector_0',  
-    index=['Interquartil-Range-Method', 'Standard-Deviation-Method', 'Modified-Z-Score-Method', 'Advanced-Gamma-Method'].index(st.session_state.selected_method),
-    on_change=update_method,
-    args=('method_selector_0',) 
-    ) 
-    st.page_link("pages/download.py", label="Determin feature ranges", icon="📐") 
-    col1, col2 = st.columns(2)
-    with col1:
-        st.page_link("pages/statistics.py", label="Data Statistics", icon="📊")
-    with col2:
-        st.page_link("pages/visualization.py", label="Data Visualization", icon="📈")
+    if not st.session_state.data.empty:
+        st.selectbox(
+        label='Choose method to determine feature ranges (only for numerical values):',
+        options=['Interquartil-Range-Method', 'Standard-Deviation-Method', 'Modified-Z-Score-Method', 'Advanced-Gamma-Method'],
+        key='method_selector_0',  
+        index=['Interquartil-Range-Method', 'Standard-Deviation-Method', 'Modified-Z-Score-Method', 'Advanced-Gamma-Method'].index(st.session_state.selected_method),
+        on_change=update_method,
+        args=('method_selector_0',) 
+        )
+        st.page_link("pages/download.py", label="Determin feature ranges", icon="📐") 
+        col1, col2 = st.columns(2)
+        with col1:
+            st.page_link("pages/statistics.py", label="Data Statistics", icon="📊")
+        with col2:
+            st.page_link("pages/visualization.py", label="Data Visualization", icon="📈")
     
-
-            
+     
 
 
     
