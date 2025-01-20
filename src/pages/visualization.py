@@ -12,8 +12,6 @@ data = st.session_state.data
 
 if not data.empty:
 
-    st.write(data)
-
     data = data.select_dtypes(include=['number'])
 
     selections =  ["-Select feature-"] + list(data.columns)
