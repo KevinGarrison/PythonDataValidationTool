@@ -309,30 +309,29 @@ class Statistics:
 
     # Function to generate QQ plot
     @st.cache_data
-    def qq_plot(self, dist_name, data, sample_size, random_state=42):
+    def qq_plot(self, dist_name, data, selected_feature, sample_size, random_state=42):
         np.random.seed(random_state)
 
         # Estimate parameters based on the sample data
         if dist_name == 'norm':
-            params = {'mean': np.mean(data), 'std': np.std(data)}
+            params = {'mean': np.mean(data[selected_feature]), 'std': np.std(data[selected_feature])}
         elif dist_name == 'chisquare':
-            params = {'df': max(np.mean(data) ** 2 / np.var(data), 1)}  # Ensure df > 0
+            params = {'df': max(np.mean(data[selected_feature]) ** 2 / np.var(data[selected_feature]), 1)}  # Ensure df > 0
         elif dist_name == 'expon':
-            params = {'scale': np.mean(data)}
+            params = {'scale': np.mean(data[selected_feature])}
         elif dist_name == 'uniform':
-            params = {'low': np.min(data), 'high': np.max(data)}
+            params = {'low': np.min(data[selected_feature]), 'high': np.max(data[selected_feature])}
         elif dist_name == 'binomial':
-            n = int(np.max(data))  # Estimate n as the maximum observed value
-            p = np.mean(data) / n  # Estimate p from the mean
+            n = int(np.max(data[selected_feature]))  # Estimate n as the maximum observed value
+            p = np.mean(data[selected_feature]) / n  # Estimate p from the mean
             params = {'n': n, 'p': p}
         elif dist_name == 'lognorm':
-            shape, loc, scale = stats.lognorm.fit(data, floc=0)
+            shape, loc, scale = stats.lognorm.fit(data[selected_feature], floc=0)
             params = {'shape': shape, 'loc': loc, 'scale': scale}
         elif dist_name == 'pareto':
             b = 2  # Example shape parameter
             params = {'b': b}
 
-        st.write(params)
         # Compute theoretical quantiles based on the estimated parameters
         if dist_name == 'norm':
             theoretical_quantiles = stats.norm.ppf(np.linspace(0.01, 0.99, sample_size), loc=params['mean'], scale=params['std'])
@@ -350,7 +349,7 @@ class Statistics:
             theoretical_quantiles = stats.pareto.ppf(np.linspace(0.01, 0.99, sample_size), params['b'])
 
         # Sort the sample values
-        sorted_samples = np.sort(data)
+        sorted_samples = np.sort(data[selected_feature])
         
         # Create a DataFrame for plotting
         df = pd.DataFrame({

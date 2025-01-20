@@ -35,7 +35,7 @@ if not data.empty:
         elif not activate:
             stats_obj.plot_histogram_with_theoretical(data=data, selected_feature=selected_feature, bins=bins, dist_name='norm', key=selected_feature)
         else:
-            stats_obj.qq_plot(dist_name=selected_dist, data=data, sample_size=len(data))
+            stats_obj.qq_plot(dist_name=selected_dist, data=data, selected_feature=selected_feature, sample_size=len(data))
             stats_obj.plot_histogram_with_theoretical(data=data, selected_feature=selected_feature, bins=bins, dist_name=selected_dist, key=selected_feature)
 
         selections_plot = ['Box Plot', 'Violin Plot']
