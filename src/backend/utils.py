@@ -11,7 +11,7 @@ stats = Statistics()
 @dataclass
 class Utilitis:
 
-    @st.cache_data
+    #@st.cache_data
     def load_data(self, uploaded_file) -> pd.DataFrame:
         '''loads the data format csv or excel into a pandas dataframe'''
         if uploaded_file is not None:
@@ -28,13 +28,13 @@ class Utilitis:
             
     
 
-    @st.cache_data
+    #@st.cache_data
     def session_state_clearer(self):
         '''clears all session states'''
         st.session_state.clear()
 
 
-    @st.cache_data
+    #@st.cache_data
     def run_algorithm(self, df:pd.DataFrame, approach:str):
         '''runs the chosen algorithm for outlier detection'''
         try:
@@ -53,7 +53,7 @@ class Utilitis:
             return None
         
 
-    @st.cache_data
+    #@st.cache_data
     def apply_filters_on_features(self):
         if 'filter_ranges' in st.session_state:
             filter_ranges_df = st.session_state.filter_ranges

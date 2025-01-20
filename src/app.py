@@ -28,14 +28,10 @@ if 'page' not in st.session_state:
     st.session_state['filter_ranges'] = None
     # Action states
     st.session_state['data_cleaned'] = False
-    st.session_state['upload_new_data'] = False
+    st.session_state['uploaded_data'] = False
     # Keys for dropdown menus
     st.session_state['selected_method'] = 'Interquartil-Range-Method'
     st.session_state['selected_feature'] = None
-    # Great Expectation states
-    st.session_state['batch_definition'] = None
-    st.session_state['batch_parameters'] = None
-    st.session_state['min_max_exp'] = None
 
 
 st.header("Numerical Data Validation Tool", divider="rainbow")
