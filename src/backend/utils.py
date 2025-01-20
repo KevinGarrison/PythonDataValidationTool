@@ -67,28 +67,4 @@ class Utilitis:
                 st.session_state.data_filtered = None
                 st.session_state.data_filtered = df
 
-
-    @st.cache_data
-    def setup_gx(self):
-        '''Set up Great Expectations context and connect to the loaded data'''
-        context = gx.get_context()
-        data_source_name = "numerical_eval_data_source"
-        context.data_sources.add_pandas(name=data_source_name)
-        data_source = context.data_sources.get(data_source_name)
-        data_asset_name = "numerical_eval_data_asset"
-        data_source.add_dataframe_asset(name=data_asset_name)
-        data_asset = context.data_sources.get(data_source_name).get_asset(data_asset_name)
-        batch_definition_name = "numerical_eval_batch_definition"
-        st.session_state.batch_definition = data_asset.add_batch_definition_whole_dataframe(
-           batch_definition_name
-        )
-
-    
-    @st.cache_data
-    def define_column_values_between_exp(self, column, min, max):
-        '''Define an expectation for column mean values to be between a specified range'''
-
-        return gx.expectations.ExpectColumnValuesToBeBetween(
-            column=column, min_value=min, max_value=max
-        )
     

@@ -24,9 +24,6 @@ if 'process_data' in st.session_state:
 if 'page' not in st.session_state:
     # Data states
     st.session_state['data'] = pd.DataFrame()
-    #st.session_state['data_numerical'] = None
-    #st.session_state['data_filtered'] = None
-    #st.session_state['data_final'] = None
     # Filter range state
     st.session_state['filter_ranges'] = None
     # Action states
