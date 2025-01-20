@@ -10,9 +10,9 @@ st.header("Visualization of your data", divider="rainbow")
 
 data = st.session_state.data
 
-st.write(data)
-
 if not data.empty:
+
+    st.write(data)
 
     data = data.select_dtypes(include=['number'])
 
