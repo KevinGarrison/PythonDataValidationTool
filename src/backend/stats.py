@@ -10,7 +10,7 @@ class Statistics:
     """A data analysis class that provides methods for summarizing data, detecting outliers, 
        and normalizing features using various statistical and machine learning approaches."""
 
-    #@st.cache_data                                                                                                          
+    @st.cache_data                                                                                                          
     def std_approach(self, df, alpha: int = 3):
         """Applies a standard deviation method to define outlier thresholds."""
         df = df.select_dtypes(include=['number'])
@@ -22,7 +22,7 @@ class Statistics:
             'upper_bound': round(summary.loc['mean'] + alpha * summary.loc['std'],2)
         })
 
-    #@st.cache_data
+    @st.cache_data
     def iqr_approach(self, df):                                                                                                 
         """Applies the IQR method to calculate feature bounds."""
         df = df.select_dtypes(include=['number'])
@@ -34,7 +34,7 @@ class Statistics:
             'upper_bound': round(summary.loc['75%'] + 1.5 * (summary.loc['75%'] - summary.loc['25%']),2)
         })
 
-    #@st.cache_data
+    @st.cache_data
     def modified_z_score_approach(self, df, k: float = 3.5):
         """calculates modified z-scores as tresholds."""
         df = df.select_dtypes(include=['number'])
@@ -53,7 +53,7 @@ class Statistics:
         return pd.DataFrame(filter_ranges)
            
     
-    #@st.cache_data
+    @st.cache_data
     def gamma_method_modified(self, df, alphas: int = 6, alphak: int = 30, beta_1=2, beta_2=2, gamma=2):
         """gets tresholds using skewness and kurtosis with flexible gamma adjustments."""
         df = df.select_dtypes(include=['number'])
@@ -83,7 +83,7 @@ class Statistics:
             
         return pd.DataFrame(filter_ranges)
 
-    #@st.cache_data
+    @st.cache_data
     def boxplot_px(self, data, ranges, column, bound_color='color_bounds_boxplot'):
         
         data = data
@@ -198,7 +198,7 @@ class Statistics:
 
 
     # Function to generate QQ plot
-    #@st.cache_data
+    @st.cache_data
     def qq_plot(self, dist_name, data, selected_feature, sample_size, random_state=42):
         np.random.seed(random_state)
 

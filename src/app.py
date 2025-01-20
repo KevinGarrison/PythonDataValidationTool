@@ -18,10 +18,8 @@ def set_page(page):
 def update_method(key, *args):
     st.session_state.selected_method = st.session_state[key]
 
-if 'process_data' in st.session_state:
-    del st.session_state.process_data
-
-if 'page' not in st.session_state:
+if 'init' not in st.session_state:
+    st.session_state['init'] = True
     # Data states
     st.session_state['data'] = pd.DataFrame()
     # Filter range state
