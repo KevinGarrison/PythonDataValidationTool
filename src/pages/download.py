@@ -55,9 +55,9 @@ if not data.empty:
             upper = data_collection[selected_feature]['upper']
             st.write(f'Expected lower bound: {lower}',)
             st.write(f'Expected upper bound: {upper}',)
-            st.write(f'Observations total: {data_collection[selected_feature]['total_count']}',)
-            st.write(f'Unexpected observations: {data_collection[selected_feature]['not_valid_count']}',)
-            st.write(f'Unexpected observations in %: {data_collection[selected_feature]['not_valid_perc']}',)
+            st.write(f"Observations total: {data_collection[selected_feature]['total_count']}",)
+            st.write(f"Unexpected observations: {data_collection[selected_feature]['not_valid_count']}",)
+            st.write(f"Unexpected observations in %: {data_collection[selected_feature]['not_valid_perc']}",)
 
         st.selectbox(
             label='Choose method to determine feature ranges:',
